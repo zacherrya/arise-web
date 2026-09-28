@@ -1429,6 +1429,64 @@ function trelloAuthUrl(key){
   return `https://trello.com/1/authorize?expiration=never&scope=read&response_type=token&name=ARISE&key=${encodeURIComponent(key)}`;
 }
 
+/* One-click connect (web only). ARISE's own app key is public; Trello sends
+   the user's read-only token back in the URL fragment. A token is accepted
+   only if this device started the connect, for the same account, recently. */
+const TRELLO_APP_KEY = (window.ARISEIntegrationConfig && window.ARISEIntegrationConfig.trelloAppKey) || "";
+const TRELLO_PENDING_KEY = "arise.trello.pending.v1";
+const TRELLO_PENDING_MAX_AGE = 10 * 60 * 1000;
+let pendingTrelloToken = null;
+
+function trelloOneClickAvailable(){ return !!TRELLO_APP_KEY && !isDesktop(); }
+
+function setTrelloManualVisible(visible){
+  for(const id of ["trelloManual", "trelloConnect"]){
+    const el = document.getElementById(id);
+    if(el) el.style.display = visible ? "" : "none";
+  }
+}
+
+function trelloStartConnect(){
+  if(!trelloOneClickAvailable()) return false;
+  localStorage.setItem(TRELLO_PENDING_KEY, JSON.stringify({ account: activeDataUserId || "local", at: Date.now() }));
+  const loc = window.location;
+  loc.assign(`${trelloAuthUrl(TRELLO_APP_KEY)}&callback_method=fragment&return_url=${encodeURIComponent(loc.origin + loc.pathname)}`);
+  return true;
+}
+
+function captureTrelloReturn(){
+  const loc = window.location, hist = window.history;
+  const hash = loc?.hash || "";
+  if(!hist || !/^#(.*&)?(token|error)=/.test(hash)) return;
+  const params = new URLSearchParams(hash.slice(1));
+  let pending = null;
+  try{ pending = JSON.parse(localStorage.getItem(TRELLO_PENDING_KEY) || "null"); }catch(e){}
+  localStorage.removeItem(TRELLO_PENDING_KEY);
+  hist.replaceState(null, "", loc.pathname + loc.search);
+  if(!pending || !pending.account || !(Date.now() - pending.at < TRELLO_PENDING_MAX_AGE)) return;
+  const token = params.get("token");
+  pendingTrelloToken = token && /^[A-Za-z0-9]{32,128}$/.test(token)
+    ? { token, account: pending.account }
+    : { error: true, account: pending.account };
+}
+
+function applyPendingTrelloToken(){
+  const pending = pendingTrelloToken;
+  pendingTrelloToken = null;
+  if(!pending || pending.account !== (activeDataUserId || "local")) return false;
+  openModal("modalSync"); renderTrelloState(); renderSettings(); notificationsUI?.render(); refreshBackupList();
+  document.getElementById("trelloConnectOneClick")?.scrollIntoView({ block:"center" });
+  if(pending.error){ syncMsg("Trello didn't connect. Try Connect Trello again.", "err"); return false; }
+  const cfg = trelloCfg();
+  cfg.key = TRELLO_APP_KEY;
+  cfg.token = pending.token;
+  save();
+  document.getElementById("trelloKey").value = cfg.key;
+  document.getElementById("trelloToken").value = cfg.token;
+  trelloLoadBoards();
+  return true;
+}
+
 function syncMsg(text, kind){
   const el = document.getElementById("syncStatus");
   if(!el) return;
@@ -1733,6 +1791,7 @@ async function finishSignIn(){
   unlockApp();
   if(cloudDataEnabled())void startAccountDataSync();
   else void offerCloudRestore(activeDataUserId);
+  applyPendingTrelloToken();
 }
 async function handleCloudGoogleCallback(){
   if(isDesktop()||!window.location?.search)return false;
@@ -1802,8 +1861,14 @@ function renderTrelloState(){
   const cfg = trelloCfg();
   const k = document.getElementById("trelloKey");
   const t = document.getElementById("trelloToken");
-  if(k && !k.value) k.value = cfg.key || "";
+  if(k && !k.value) k.value = cfg.key || (isDesktop() ? TRELLO_APP_KEY : "");
   if(t && !t.value) t.value = cfg.token || "";
+  const oneClick = document.getElementById("trelloOneClick");
+  const usesOwnKey = !!cfg.key && cfg.key !== TRELLO_APP_KEY;
+  if(oneClick) oneClick.style.display = trelloOneClickAvailable() ? "" : "none";
+  if(!trelloOneClickAvailable() || usesOwnKey) setTrelloManualVisible(true);
+  const oneClickBtn = document.getElementById("trelloConnectOneClick");
+  if(oneClickBtn) oneClickBtn.textContent = (cfg.token && cfg.key === TRELLO_APP_KEY) ? "Choose boards" : "Connect Trello";
   const last = document.getElementById("trelloLast");
   if(last){
     last.textContent = cfg.lastSync
@@ -2535,6 +2600,23 @@ document.addEventListener("click", async (e)=>{
     openExternal(trelloAuthUrl(key)).then(ok=>{
       if(!ok) syncMsg("Couldn't open the browser. Copy this URL: "+trelloAuthUrl(key), "err");
     });
+    return;
+  }
+  if(t.id==="trelloConnectOneClick"){
+    const cfg = trelloCfg();
+    if(cfg.token && cfg.key === TRELLO_APP_KEY){
+      document.getElementById("trelloKey").value = cfg.key;
+      document.getElementById("trelloToken").value = cfg.token;
+      trelloLoadBoards();
+    } else if(!trelloStartConnect()){
+      syncMsg("One-click connect isn't available here. Use your own key below.", "err");
+    }
+    return;
+  }
+  if(t.id==="trelloManualToggle"){
+    e.preventDefault();
+    const manual = document.getElementById("trelloManual");
+    setTrelloManualVisible(!!manual && manual.style.display === "none");
     return;
   }
   if(t.id==="trelloConnect"){ trelloLoadBoards(); return; }
@@ -3920,6 +4002,7 @@ notificationsUI=window.ARISENotifications?.create({getState:()=>state,save,toast
 customRemindersUI=window.ARISECustomReminders?.create({getState:()=>state,save,escapeHtml,uid,confirm:uiConfirm});
 healthUI=window.ARISEHealth?.create({getState:()=>state,save,toast,notify:(title,body)=>notificationsUI?notificationsUI.deliver('water',title,body):toast(`${title} · ${body}`)});
 window.ARISEHandControl?.create();
+captureTrelloReturn();
 maybeMigrateFromFileOrigin().finally(init);
 
 })();

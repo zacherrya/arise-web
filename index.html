@@ -1160,6 +1160,12 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
     <div class="data-head" style="margin-top:18px;">Trello</div>
     <div class="sub">Pulls your cards in as gates. One-way and read-only — ARISE can't change anything on your boards.</div>
 
+    <div id="trelloOneClick" style="display:none;margin:4px 0 12px;">
+      <button class="btn btn-primary btn-sm" id="trelloConnectOneClick">Connect Trello</button>
+      <div class="sync-hint">You'll approve <b>read-only</b> access on Trello, then come straight back here. <a href="#" id="trelloManualToggle" class="sync-link">Use your own key instead</a></div>
+    </div>
+
+    <div id="trelloManual" style="display:none;">
     <div class="field">
       <label>1. API key <a href="#" id="trelloKeyLink" class="sync-link">get it here →</a></label>
       <input id="trelloKey" placeholder="Paste your Trello API key" autocomplete="off" spellcheck="false">
@@ -1168,6 +1174,7 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
       <label>2. Token <a href="#" id="trelloTokenLink" class="sync-link">generate one →</a></label>
       <input id="trelloToken" placeholder="Paste the token Trello shows you" autocomplete="off" spellcheck="false">
       <div class="sync-hint">The link asks for <b>read-only</b> access. Approve it, then copy the token from the page.</div>
+    </div>
     </div>
 
     <label class="board-row" style="margin:2px 0 2px;">
@@ -1180,7 +1187,7 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
     </label>
     <div class="sync-hint" id="trelloWho" style="margin:-6px 0 10px;"></div>
 
-    <button class="btn btn-primary btn-sm" id="trelloConnect">Connect &amp; list boards</button>
+    <button class="btn btn-primary btn-sm" id="trelloConnect" style="display:none;">Connect &amp; list boards</button>
     <button class="btn btn-sm" id="trelloResync" style="display:none;margin-left:6px;">Sync now</button>
 
     <div id="syncStatus" class="sync-status"></div>
@@ -1190,7 +1197,7 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
       <span id="trelloLast">Not synced yet.</span>
       <button class="btn btn-sm btn-danger" id="trelloDisconnect">Disconnect</button>
     </div>
-    <div class="sync-warn">Your key and token are saved on this Mac in the app's local storage, unencrypted. You can revoke access any time from Trello's account settings.</div>
+    <div class="sync-warn">Your Trello access is saved on this device in the app's local storage, unencrypted, and never uploaded to ARISE's cloud. You can revoke access any time from Trello's account settings.</div>
 
     <div class="data-head" style="margin-top:18px;">Google Calendar</div>
     <div class="sub">Use the OAuth credentials from your Google Cloud Desktop app. Tokens are stored securely in macOS Keychain.</div>
