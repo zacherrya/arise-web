@@ -1,0 +1,109 @@
+/* Settings: tabbed layout (sidebar on wide screens, list -> detail on phones).
+   Uses ARISE's theme variables only, so light mode follows automatically. */
+.modal.settings{max-width:880px;width:100%;padding:0;display:flex;flex-direction:column;height:min(86vh,720px);max-height:86vh;overflow:hidden;container-type:inline-size;container-name:settings}
+.settings .st-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);flex:none}
+.settings .st-head h3{margin:0;flex:1;font-family:var(--font-display);font-size:14px;letter-spacing:.2em;text-transform:uppercase}
+.settings .st-title-section{display:none}
+.st-iconbtn{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);color:var(--text-dim);cursor:pointer;padding:0}
+.st-iconbtn:hover{color:var(--text);border-color:var(--border-lit)}
+.st-iconbtn svg,.st-nav button>*{pointer-events:none}
+.settings .st-back{display:none}
+.settings .st-body{display:grid;grid-template-columns:210px minmax(0,1fr);flex:1;min-height:0}
+.settings .st-nav{border-right:1px solid var(--border);padding:12px 10px;background:var(--bg-1);overflow-y:auto}
+.settings .st-nav button{display:flex;align-items:center;gap:11px;width:100%;background:none;border:0;border-radius:11px;padding:11px 12px;margin-bottom:3px;cursor:pointer;color:var(--text-dim);font:inherit;font-size:15px;font-weight:600;text-align:left}
+.settings .st-nav button svg{flex:none;opacity:.85}
+.settings .st-nav button:hover{background:var(--panel-2);color:var(--text)}
+.settings .st-nav button[aria-selected="true"]{background:linear-gradient(90deg,color-mix(in srgb,var(--primary) 22%,transparent),color-mix(in srgb,var(--primary) 5%,transparent));color:var(--text);box-shadow:inset 2px 0 0 var(--primary)}
+.settings .st-nav button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.settings .st-count{margin-left:auto;font-size:11px;font-weight:700;color:var(--success)}
+.settings .st-chev{display:none;margin-left:auto;color:var(--text-faint);font-size:18px}
+.settings .st-count:not([hidden])+.st-chev{margin-left:6px}
+.settings .st-panes{overflow-y:auto;padding:22px 24px 28px;min-height:0}
+.settings .st-pane-title{font-family:var(--font-display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-faint);margin:0 0 14px;font-weight:700}
+
+/* grouped rows */
+.settings .st-group{background:var(--bg-1);border:1px solid var(--border);border-radius:14px;margin-bottom:18px;overflow:hidden}
+.settings .st-group-pad{padding:14px 16px}
+.settings .st-group-title{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:0 0 8px 4px}
+.settings .st-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-top:1px solid var(--hairline);cursor:pointer;font-size:15px}
+.settings .st-group>.st-row:first-child,.settings #voiceSubSettings>.st-row:first-child{border-top:1px solid var(--hairline)}
+.settings .st-group>.st-row:first-child{border-top:0}
+.settings .st-row-stack{display:block;cursor:default}
+.settings .st-label{font-weight:600;color:var(--text)}
+.settings .st-label small{display:block;font-size:13px;font-weight:500;color:var(--text-faint);margin-top:1px}
+.settings .st-row-stack>.st-label{display:block;margin-bottom:8px}
+.settings .st-desc{margin:0 0 12px;font-size:14px;line-height:1.5;color:var(--text-dim)}
+.settings .st-fine{margin:10px 0 0;font-size:13px;line-height:1.5;color:var(--text-faint)}
+.settings .st-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.settings .st-actions select{flex:1;min-width:150px}
+.settings .st-inline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.settings .st-inline .ai-status{margin:0}
+.settings .st-link{background:none;border:0;padding:4px 2px;font:inherit;font-size:13px;font-weight:600;color:var(--text-dim);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.settings .st-link-danger{color:var(--danger)}
+.settings .st-actions .st-link{margin-left:auto}
+
+/* existing blocks, re-seated inside the new layout */
+.settings .effects-settings{padding:13px 16px;border-bottom:0;margin:0}
+.settings .effects-settings p{margin-top:8px}
+.settings .voice-settings{border-top:1px solid var(--hairline);margin:0;padding:13px 16px}
+.settings .voice-settings select{width:100%}
+.settings .notification-settings{padding:0;margin:0;border-bottom:0}
+.settings .ai-status{margin:10px 0 0}
+.settings .field:last-child{margin-bottom:0}
+
+/* switches (real checkboxes, so existing code keeps working) */
+.settings input.st-switch{appearance:none;-webkit-appearance:none;position:relative;flex:none;width:42px;height:24px;margin:0;border-radius:999px;background:var(--panel-2);border:1px solid var(--border);cursor:pointer;transition:background .2s,border-color .2s}
+.settings input.st-switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-faint);transition:transform .2s,background .2s}
+.settings input.st-switch:checked{background:var(--primary);border-color:var(--primary)}
+.settings input.st-switch:checked::after{transform:translateX(18px);background:#fff}
+.settings input.st-switch:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+/* connection cards */
+.settings .st-card{background:var(--bg-1);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px}
+.settings .st-card.is-connected{border-color:color-mix(in srgb,var(--success) 35%,var(--border))}
+.settings .st-card-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.settings .st-logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none}
+.settings .st-logo-trello{background:#0c66e4}
+.settings .st-logo-google{background:#fff;border:1px solid var(--border)}
+.settings .st-card-name{font-family:var(--font-display);font-size:14px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;margin-bottom:3px}
+.settings .st-card-head .ai-status{margin:0;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text-faint)}
+.settings .st-card-head .ai-status::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.settings .st-card-head .ai-status.ok{color:var(--success)}
+.settings .st-card-head .ai-status.err{color:var(--danger-soft)}
+.settings .st-card-opts{border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);margin:4px 0 2px}
+.settings .st-card-opts .st-row{padding:11px 2px;font-size:14px}
+.settings .st-card-opts .st-row:first-child{border-top:0}
+.settings .st-card:not(.is-connected) .st-when-on{display:none}
+.settings #trelloManual{margin-top:14px}
+.settings .board-list:empty,.settings .sync-status:empty{display:none}
+.settings .board-list{margin-top:10px}
+
+/* The voice dock sits above every overlay on purpose; only step it aside
+   where the wider Settings panel would actually collide with it. */
+@media (max-width:1199px){ body:has(#modalSync.show) .voice-dock{visibility:hidden} }
+@media (max-width:640px){ body:has(#modalSync.show) .top-search-anchor{visibility:hidden} }
+
+/* show only what works on this device */
+#modalSync.is-web .st-desktop-only{display:none !important}
+
+/* phone: list of sections, tap in for detail */
+@container settings (max-width:620px){
+  .settings .st-body{grid-template-columns:1fr}
+  .settings .st-nav{border-right:0;padding:6px 12px;background:transparent}
+  .settings .st-nav button{border-radius:0;margin:0;padding:15px 8px;border-bottom:1px solid var(--hairline)}
+  .settings .st-nav button[aria-selected="true"]{background:none;box-shadow:none;color:var(--text-dim)}
+  .settings .st-chev{display:block}
+  .settings .st-panes{display:none;padding:18px 16px 26px}
+  .settings.st-detail .st-nav{display:none}
+  .settings.st-detail .st-panes{display:block}
+  .settings.st-detail .st-back{display:grid}
+  .settings.st-detail .st-title-root{display:none}
+  .settings.st-detail .st-title-section{display:inline}
+  .settings.st-detail .st-head h3{text-align:center}
+  .settings.st-detail .st-pane-title{display:none}
+  .settings .st-actions .st-link{margin-left:0}
+}
+@media (max-width:640px){
+  #modalSync{padding:0;align-items:stretch}
+  .modal.settings{height:100%;max-height:none;border-radius:0;border:0}
+}

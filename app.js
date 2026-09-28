@@ -893,8 +893,8 @@ function scrollCalendarToNow(){
   const now=new Date(),minutes=now.getHours()*60+now.getMinutes(),top=Math.max(0,Math.min(1080,minutes-390));
   document.querySelectorAll(".cal-day-body").forEach(body=>{body.scrollTop=top});
 }
-function googleStatusMsg(text,kind){const e=document.getElementById("googleStatus");if(e){e.textContent=text;e.className="ai-status "+(kind||"")}}
-async function refreshGoogleStatus(){if(!isDesktop()){googleStatusMsg("Available in the desktop app.","err");return false}try{const ok=await tauriInvoke("google_status");googleStatusMsg(ok?"Google Calendar connected.":"Not connected.",ok?"ok":"");return ok}catch(e){googleStatusMsg("Couldn't check Google connection.","err");return false}}
+function googleStatusMsg(text,kind){const e=document.getElementById("googleStatus");if(e){e.textContent=text;e.className="ai-status "+(kind||"")}updateConnectionsCount();}
+async function refreshGoogleStatus(){if(!isDesktop()){googleStatusMsg("Available in the Mac app for now.","");return false}try{const ok=await tauriInvoke("google_status");googleStatusMsg(ok?"Google Calendar connected.":"Not connected.",ok?"ok":"");return ok}catch(e){googleStatusMsg("Couldn't check Google connection.","err");return false}}
 async function syncGoogleCalendar(silent){
   if(!await refreshGoogleStatus()){if(!silent)toast("Connect Google Calendar in Settings","danger");return}
   const {start,end}=calRange(); try{const data=await tauriInvoke("google_list_events",{timeMin:start.toISOString(),timeMax:end.toISOString()});state.calendar.events=data.items||[];state.calendar.lastSync=Date.now();
@@ -1474,8 +1474,7 @@ function applyPendingTrelloToken(){
   const pending = pendingTrelloToken;
   pendingTrelloToken = null;
   if(!pending || pending.account !== (activeDataUserId || "local")) return false;
-  openModal("modalSync"); renderTrelloState(); renderSettings(); notificationsUI?.render(); refreshBackupList();
-  document.getElementById("trelloConnectOneClick")?.scrollIntoView({ block:"center" });
+  openSettings("connections");
   if(pending.error){ syncMsg("Trello didn't connect. Try Connect Trello again.", "err"); return false; }
   const cfg = trelloCfg();
   cfg.key = TRELLO_APP_KEY;
@@ -1881,8 +1880,57 @@ function renderTrelloState(){
   if(mine) mine.checked = !!cfg.onlyMine;
   const auto = document.getElementById("trelloAutoSync");
   if(auto) auto.checked = !!cfg.autoSync;
+  const connected = !!(cfg.token && cfg.memberName);
   const who = document.getElementById("trelloWho");
-  if(who) who.textContent = cfg.memberName ? `Signed in as ${cfg.memberName}.` : "";
+  if(who){ who.textContent = connected ? `Connected as ${cfg.memberName}` : "Not connected"; who.className = "ai-status" + (connected ? " ok" : ""); }
+  document.getElementById("trelloCard")?.classList.toggle("is-connected", connected);
+  if(oneClickBtn) oneClickBtn.classList.toggle("btn-primary", !connected);
+  if(resync) resync.classList.toggle("btn-primary", connected);
+  const hint = document.getElementById("trelloOneClickHint");
+  if(hint) hint.style.display = trelloOneClickAvailable() && !connected ? "" : "none";
+  const toggle = document.getElementById("trelloManualToggle");
+  if(toggle) toggle.style.display = trelloOneClickAvailable() ? "" : "none";
+  updateConnectionsCount();
+}
+
+/* Settings: tabs on wide screens, a list you tap into on phones (see settings.css). */
+const SETTINGS_TAB_KEY = "arise.settings.tab.v1";
+function showSettingsTab(name, opts){
+  const panel = document.querySelector("#modalSync .settings");
+  const tab = panel && panel.querySelector(`[data-settings-tab="${name}"]`);
+  if(!tab) return;
+  panel.querySelectorAll("[data-settings-tab]").forEach(t=>{ const on = t === tab; t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1; });
+  panel.querySelectorAll(".st-pane").forEach(p=>{ p.hidden = p.id !== "stPane-" + name; });
+  panel.classList.toggle("st-detail", !!(opts && opts.detail));
+  const title = document.getElementById("settingsTitleSection");
+  if(title) title.textContent = tab.querySelector(".st-tab-label")?.textContent || "";
+  try{ localStorage.setItem(SETTINGS_TAB_KEY, name); }catch(e){}
+  if(opts && opts.focus) tab.focus();
+}
+function openSettings(tab){
+  const modal = document.getElementById("modalSync");
+  modal?.classList.toggle("is-web", !isDesktop());
+  const nav = modal?.querySelector(".st-nav");
+  if(nav && !nav.dataset.keys){ nav.dataset.keys = "1"; nav.addEventListener("keydown", settingsNavKeys); }
+  openModal("modalSync"); renderTrelloState(); renderSettings(); notificationsUI?.render(); refreshBackupList();
+  let saved = null; try{ saved = localStorage.getItem(SETTINGS_TAB_KEY); }catch(e){}
+  showSettingsTab(tab || saved || "general", { detail: !!tab });
+}
+function settingsNavKeys(e){
+  const tabs = [...e.currentTarget.querySelectorAll("[data-settings-tab]")], i = tabs.indexOf(document.activeElement);
+  if(i < 0) return;
+  const next = {ArrowDown:i+1, ArrowUp:i-1, Home:0, End:tabs.length-1}[e.key];
+  if(next === undefined) return;
+  e.preventDefault();
+  const tab = tabs[(next + tabs.length) % tabs.length];
+  showSettingsTab(tab.dataset.settingsTab, { focus:true, detail:document.querySelector("#modalSync .settings")?.classList.contains("st-detail") });
+}
+function updateConnectionsCount(){
+  const el = document.getElementById("settingsConnCount");
+  if(!el) return;
+  const n = (document.getElementById("trelloCard")?.classList.contains("is-connected") ? 1 : 0) + (document.getElementById("googleStatus")?.classList.contains("ok") ? 1 : 0);
+  el.hidden = n === 0;
+  el.textContent = n + " connected";
 }
 
 async function trelloDisconnect(){
@@ -1972,7 +2020,7 @@ function aiStatus(text, kind){
   el.className="ai-status "+(kind||""); el.textContent=text;
 }
 async function refreshAIStatus(){
-  if(!isDesktop()){ aiStatus("Nexus AI is available in the desktop app.","err"); return false; }
+  if(!isDesktop()){ aiStatus("Nexus AI is available in the Mac app for now.",""); return false; }
   try{
     const connected=await tauriInvoke("ai_key_status");
     aiStatus(connected?"Connected securely through macOS Keychain.":"Not connected.",connected?"ok":"");
@@ -2189,6 +2237,9 @@ async function autoBackup(){
 /* ============ EVENT WIRING ============ */
 document.addEventListener("click", async (e)=>{
   const t = e.target;
+  const settingsTab = t.closest && t.closest("[data-settings-tab]");
+  if(settingsTab){ showSettingsTab(settingsTab.dataset.settingsTab, { detail:true }); return; }
+  if(t.closest && t.closest("#settingsBack")){ document.querySelector("#modalSync .settings")?.classList.remove("st-detail"); return; }
   if(t.closest('#themeToggle')){toggleTheme();return;}
   if(Date.now()<calendarSuppressClickUntil&&(t.closest("[data-cal-event]")||t.closest("[data-drag-gate]")))return;
 
@@ -2416,7 +2467,7 @@ document.addEventListener("click", async (e)=>{
     return;
   }
 
-  if(t.closest('#syncToggle')){ openModal("modalSync"); renderTrelloState(); renderSettings(); notificationsUI?.render(); refreshBackupList(); return; }
+  if(t.closest('#syncToggle')){ openSettings(); return; }
   if(t.id==="googleConnect"){
     const clientId=document.getElementById("googleClientId").value.trim(),clientSecret=document.getElementById("googleClientSecret").value.trim();
     if(!clientId||!clientSecret){googleStatusMsg("Enter both OAuth fields.","err");return}googleStatusMsg("Complete Google sign-in in your browser…");t.disabled=true;

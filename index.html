@@ -1113,130 +1113,162 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
 
 <!-- Trello Sync Modal -->
 <div class="overlay" id="modalSync">
-  <div class="modal sync-modal">
-    <h3>Settings</h3>
-    <section id="notificationSettings" class="notification-settings"></section>
-    <div class="effects-settings">
-      <label for="effectsMode">System effects</label>
-      <select id="effectsMode" aria-describedby="effectsStatus"><option value="minimal">Minimal</option><option value="system">System</option><option value="cinematic">Cinematic</option></select>
-      <p id="effectsStatus" role="status">Subtle energy effects for meaningful actions.</p>
+  <div class="modal sync-modal settings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="st-head">
+      <button class="st-iconbtn st-back" type="button" id="settingsBack" aria-label="Back to all settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h3 id="settingsTitle"><span class="st-title-root">Settings</span><span class="st-title-section" id="settingsTitleSection"></span></h3>
+      <button class="st-iconbtn st-close" type="button" data-close aria-label="Close settings"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
+    <div class="st-body">
+      <nav class="st-nav" role="tablist" aria-label="Settings sections" aria-orientation="vertical">
+        <button type="button" role="tab" id="stTab-general" aria-controls="stPane-general" aria-selected="true" data-settings-tab="general"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/><circle cx="7" cy="18" r="2" fill="currentColor"/></svg><span class="st-tab-label">General</span><span class="st-chev" aria-hidden="true">›</span></button>
+        <button type="button" role="tab" id="stTab-notifications" aria-controls="stPane-notifications" aria-selected="false" tabindex="-1" data-settings-tab="notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg><span class="st-tab-label">Notifications</span><span class="st-chev" aria-hidden="true">›</span></button>
+        <button type="button" role="tab" id="stTab-nexus" aria-controls="stPane-nexus" aria-selected="false" tabindex="-1" data-settings-tab="nexus"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg><span class="st-tab-label">Nexus</span><span class="st-chev" aria-hidden="true">›</span></button>
+        <button type="button" role="tab" id="stTab-connections" aria-controls="stPane-connections" aria-selected="false" tabindex="-1" data-settings-tab="connections"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg><span class="st-tab-label">Connections</span><span class="st-count" id="settingsConnCount" hidden></span><span class="st-chev" aria-hidden="true">›</span></button>
+        <button type="button" role="tab" id="stTab-account" aria-controls="stPane-account" aria-selected="false" tabindex="-1" data-settings-tab="account"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span class="st-tab-label">Account &amp; data</span><span class="st-chev" aria-hidden="true">›</span></button>
+      </nav>
 
-    <div class="data-head">Voice assistant</div>
-    <label class="board-row"><input type="checkbox" id="setVoiceEnabled" checked>
-      <span>Enable voice assistant <span class="sync-sub">— mic button and wake word</span></span></label>
-    <div id="voiceSubSettings">
-      <label class="board-row"><input type="checkbox" id="setWakeWord">
-        <span>Listen for "Hey Nexus" <span class="sync-sub">— hands-free</span></span></label>
-      <label class="board-row"><input type="checkbox" id="setShowTranscripts" checked>
-        <span>Show what it hears <span class="sync-sub">— on-screen transcript bubbles</span></span></label>
-      <div class="voice-settings">
-        <label for="voiceSelect">Nexus voice</label>
-        <select id="voiceSelect"></select>
-        <div class="rate-row">
-          <span>Speed</span>
-          <input type="range" id="voiceRate" min="0.7" max="1.4" step="0.1" value="1">
-          <span id="voiceRateVal">1.0x</span>
-          <button class="btn btn-sm" id="voiceTest">Test</button>
-        </div>
-        <div class="voice-tip">For better quality, download an <b>Enhanced</b> or <b>Premium</b> voice in System Settings › Accessibility › Spoken Content › System Voice › Manage Voices.</div>
+      <div class="st-panes">
+        <section class="st-pane" id="stPane-general" role="tabpanel" aria-labelledby="stTab-general">
+          <h4 class="st-pane-title">General</h4>
+          <div class="st-group">
+            <label class="st-row"><span class="st-label">Light mode</span><input type="checkbox" class="st-switch" id="setLightMode"></label>
+            <div class="st-row st-row-stack effects-settings">
+              <label for="effectsMode" class="st-label">System effects</label>
+              <select id="effectsMode" aria-describedby="effectsStatus"><option value="minimal">Minimal</option><option value="system">System</option><option value="cinematic">Cinematic</option></select>
+              <p id="effectsStatus" role="status">Subtle energy effects for meaningful actions.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="st-pane" id="stPane-notifications" role="tabpanel" aria-labelledby="stTab-notifications" hidden>
+          <h4 class="st-pane-title">Notifications</h4>
+          <div class="st-group st-group-pad"><section id="notificationSettings" class="notification-settings"></section></div>
+        </section>
+
+        <section class="st-pane" id="stPane-nexus" role="tabpanel" aria-labelledby="stTab-nexus" hidden>
+          <h4 class="st-pane-title">Nexus</h4>
+          <div class="st-group-title">Voice</div>
+          <div class="st-group">
+            <label class="st-row"><span class="st-label">Voice assistant<small>Mic button and wake word</small></span><input type="checkbox" class="st-switch" id="setVoiceEnabled" checked></label>
+            <div id="voiceSubSettings">
+              <label class="st-row"><span class="st-label">Listen for "Hey Nexus"<small>Hands-free</small></span><input type="checkbox" class="st-switch" id="setWakeWord"></label>
+              <label class="st-row"><span class="st-label">Show what it hears<small>On-screen transcript bubbles</small></span><input type="checkbox" class="st-switch" id="setShowTranscripts" checked></label>
+              <div class="st-row st-row-stack voice-settings">
+                <label for="voiceSelect" class="st-label">Nexus voice</label>
+                <select id="voiceSelect"></select>
+                <div class="rate-row">
+                  <span>Speed</span>
+                  <input type="range" id="voiceRate" min="0.7" max="1.4" step="0.1" value="1">
+                  <span id="voiceRateVal">1.0x</span>
+                  <button class="btn btn-sm" id="voiceTest">Test</button>
+                </div>
+                <div class="voice-tip">For better quality, download an <b>Enhanced</b> or <b>Premium</b> voice in System Settings › Accessibility › Spoken Content › System Voice › Manage Voices.</div>
+              </div>
+            </div>
+          </div>
+          <div class="st-group-title">Nexus AI</div>
+          <div class="st-group st-group-pad">
+            <p class="st-desc">Lets Nexus analyze your ARISE tasks and recommend practical next actions. Your key is stored in macOS Keychain.</p>
+            <div class="st-desktop-only">
+              <div class="field"><label for="openaiKey">OpenAI API key</label><input id="openaiKey" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"></div>
+              <div class="st-actions"><button class="btn btn-primary btn-sm" id="aiConnect">Save &amp; test</button><button class="st-link st-link-danger" type="button" id="aiDisconnect">Disconnect</button></div>
+            </div>
+            <div id="aiStatus" class="ai-status">Checking connection…</div>
+          </div>
+        </section>
+
+        <section class="st-pane" id="stPane-connections" role="tabpanel" aria-labelledby="stTab-connections" hidden>
+          <h4 class="st-pane-title">Connections</h4>
+
+          <div class="st-card" id="trelloCard">
+            <div class="st-card-top">
+              <div class="st-logo st-logo-trello" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="14" rx="1.6" fill="#fff"/><rect x="13.5" y="4" width="6.5" height="9" rx="1.6" fill="#fff"/></svg></div>
+              <div class="st-card-head"><div class="st-card-name">Trello</div><div class="ai-status" id="trelloWho">Not connected</div></div>
+            </div>
+            <p class="st-desc">Pulls your cards in as gates. Read-only: ARISE can't change anything on your boards.</p>
+            <div class="st-card-opts st-when-on">
+              <label class="st-row"><span class="st-label">Only cards assigned to me</span><input type="checkbox" class="st-switch" id="trelloOnlyMine" checked></label>
+              <label class="st-row"><span class="st-label">Keep in sync automatically<small>When ARISE opens, then every 15 minutes</small></span><input type="checkbox" class="st-switch" id="trelloAutoSync" checked></label>
+            </div>
+            <div class="st-actions">
+              <span id="trelloOneClick" style="display:none;"><button class="btn btn-primary btn-sm" id="trelloConnectOneClick">Connect Trello</button></span>
+              <button class="btn btn-sm" id="trelloResync" style="display:none;">Sync now</button>
+              <button class="btn btn-sm" id="trelloConnect" style="display:none;">Connect &amp; list boards</button>
+              <button class="st-link st-link-danger st-when-on" type="button" id="trelloDisconnect">Disconnect</button>
+            </div>
+            <p class="st-fine" id="trelloOneClickHint" style="display:none;">You'll approve read-only access on Trello, then come straight back here.</p>
+            <div id="syncStatus" class="sync-status"></div>
+            <div id="trelloBoards" class="board-list"></div>
+            <p class="st-fine st-when-on" id="trelloLast">Not synced yet.</p>
+            <div id="trelloManual" style="display:none;">
+              <div class="field">
+                <label>1. API key <a href="#" id="trelloKeyLink" class="sync-link">get it here →</a></label>
+                <input id="trelloKey" placeholder="Paste your Trello API key" autocomplete="off" spellcheck="false">
+              </div>
+              <div class="field">
+                <label>2. Token <a href="#" id="trelloTokenLink" class="sync-link">generate one →</a></label>
+                <input id="trelloToken" placeholder="Paste the token Trello shows you" autocomplete="off" spellcheck="false">
+                <div class="sync-hint">The link asks for <b>read-only</b> access. Approve it, then copy the token from the page.</div>
+              </div>
+            </div>
+            <p class="st-fine st-advanced" id="trelloAdvanced">Your Trello access stays on this device and is never uploaded to ARISE's cloud. <a href="#" id="trelloManualToggle" class="sync-link">Use your own Trello key</a></p>
+          </div>
+
+          <div class="st-card" id="googleCard">
+            <div class="st-card-top">
+              <div class="st-logo st-logo-google" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3" fill="#fff" stroke="#4285f4" stroke-width="2"/><rect x="3" y="4" width="18" height="5" rx="2" fill="#4285f4"/><text x="12" y="18.2" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" fill="#1a73e8">31</text></svg></div>
+              <div class="st-card-head"><div class="st-card-name">Google Calendar</div><div id="googleStatus" class="ai-status">Checking connection…</div></div>
+            </div>
+            <p class="st-desc">See your Google events in ARISE's calendar, and send planned tasks back to Google.</p>
+            <div class="st-desktop-only">
+              <p class="st-fine">For now this uses your own Google Cloud desktop credentials. Tokens are stored in macOS Keychain.</p>
+              <div class="field"><label for="googleClientId">OAuth client ID</label><input id="googleClientId" placeholder="…apps.googleusercontent.com" autocomplete="off" spellcheck="false"></div>
+              <div class="field"><label for="googleClientSecret">OAuth client secret</label><input id="googleClientSecret" type="password" placeholder="Google client secret" autocomplete="off" spellcheck="false"></div>
+              <div class="st-actions"><button class="btn btn-primary btn-sm" id="googleConnect">Connect Google</button><button class="st-link st-link-danger" type="button" id="googleDisconnect">Disconnect</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="st-pane" id="stPane-account" role="tabpanel" aria-labelledby="stTab-account" hidden>
+          <h4 class="st-pane-title">Account &amp; data</h4>
+          <div class="st-group-title">Account</div>
+          <div class="st-group st-group-pad">
+            <div class="st-inline"><div id="cloudStatus" class="ai-status">Not signed in.</div><button class="btn btn-sm" id="cloudSignOut">Sign out</button></div>
+            <div class="st-actions"><button class="btn btn-sm" type="button" id="pwaInstallSettings" hidden>Install ARISE</button></div>
+            <p id="pwaInstallSettingsHint" class="sync-hint" role="status" aria-live="polite"></p>
+          </div>
+          <div class="st-group-title">Cloud sync</div>
+          <div class="st-group st-group-pad">
+            <p class="st-desc">Optional and private to this account. Projects, tasks, local calendar plans, goals, progress and health reminders can sync. API keys, passwords, connections and device settings stay on each device.</p>
+            <div class="st-actions">
+              <button class="btn btn-primary btn-sm" id="cloudDataEnable" hidden>Turn on cloud sync</button>
+              <button class="btn btn-sm" id="cloudDataNow" hidden>Sync now</button>
+              <button class="btn btn-sm" id="cloudDataDisable" hidden>Turn off cloud sync</button>
+            </div>
+            <div id="cloudDataStatus" class="ai-status" role="status" aria-live="polite">Cloud sync is off.</div>
+            <div id="cloudDataConflict" class="cloud-migration" hidden>
+              <strong>Choose which copy to keep</strong><p id="cloudDataConflictText"></p>
+              <div class="st-actions"><button class="btn btn-sm" id="cloudDataUseDevice">Use this device</button><button class="btn btn-sm" id="cloudDataUseCloud">Use Supabase</button></div>
+            </div>
+          </div>
+          <div class="st-group-title">Backups</div>
+          <div class="st-group st-group-pad">
+            <p class="st-desc">ARISE keeps a device copy even when cloud sync is on. Save a backup regularly; achievement photos are still device-only.</p>
+            <div class="st-actions">
+              <button class="btn btn-sm" id="btnExportBackup">Save a backup now</button>
+              <button class="btn btn-sm st-desktop-only" id="btnRevealBackups">Show in Finder</button>
+            </div>
+            <div class="st-actions">
+              <select id="backupPick" class="all-sort"></select>
+              <button class="btn btn-sm" id="btnImportBackup">Restore</button>
+            </div>
+            <div id="dataStatus" class="sync-status"></div>
+            <div id="backupInfo" class="sync-hint"></div>
+          </div>
+        </section>
       </div>
     </div>
-
-    <div class="data-head" style="margin-top:18px;">Appearance</div>
-    <label class="board-row"><input type="checkbox" id="setLightMode">
-      <span>Light mode</span></label>
-
-    <div class="data-head" style="margin-top:18px;">Nexus AI</div>
-    <div class="sub">Lets Nexus analyze your ARISE tasks and recommend practical next actions. Your key is stored in macOS Keychain.</div>
-    <div class="field">
-      <label>OpenAI API key</label>
-      <input id="openaiKey" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false">
-    </div>
-    <button class="btn btn-primary btn-sm" id="aiConnect">Save &amp; test</button>
-    <button class="btn btn-sm btn-danger" id="aiDisconnect" style="margin-left:6px;">Disconnect</button>
-    <div id="aiStatus" class="ai-status">Checking connection…</div>
-
-    <div class="data-head" style="margin-top:18px;">Trello</div>
-    <div class="sub">Pulls your cards in as gates. One-way and read-only — ARISE can't change anything on your boards.</div>
-
-    <div id="trelloOneClick" style="display:none;margin:4px 0 12px;">
-      <button class="btn btn-primary btn-sm" id="trelloConnectOneClick">Connect Trello</button>
-      <div class="sync-hint">You'll approve <b>read-only</b> access on Trello, then come straight back here. <a href="#" id="trelloManualToggle" class="sync-link">Use your own key instead</a></div>
-    </div>
-
-    <div id="trelloManual" style="display:none;">
-    <div class="field">
-      <label>1. API key <a href="#" id="trelloKeyLink" class="sync-link">get it here →</a></label>
-      <input id="trelloKey" placeholder="Paste your Trello API key" autocomplete="off" spellcheck="false">
-    </div>
-    <div class="field">
-      <label>2. Token <a href="#" id="trelloTokenLink" class="sync-link">generate one →</a></label>
-      <input id="trelloToken" placeholder="Paste the token Trello shows you" autocomplete="off" spellcheck="false">
-      <div class="sync-hint">The link asks for <b>read-only</b> access. Approve it, then copy the token from the page.</div>
-    </div>
-    </div>
-
-    <label class="board-row" style="margin:2px 0 2px;">
-      <input type="checkbox" id="trelloOnlyMine" checked>
-      <span>Only import cards assigned to me</span>
-    </label>
-    <label class="board-row" style="margin:0 0 10px;">
-      <input type="checkbox" id="trelloAutoSync" checked>
-      <span>Keep in sync automatically <span class="sync-sub">— on launch + every 15 min</span></span>
-    </label>
-    <div class="sync-hint" id="trelloWho" style="margin:-6px 0 10px;"></div>
-
-    <button class="btn btn-primary btn-sm" id="trelloConnect" style="display:none;">Connect &amp; list boards</button>
-    <button class="btn btn-sm" id="trelloResync" style="display:none;margin-left:6px;">Sync now</button>
-
-    <div id="syncStatus" class="sync-status"></div>
-    <div id="trelloBoards" class="board-list"></div>
-
-    <div class="sync-foot">
-      <span id="trelloLast">Not synced yet.</span>
-      <button class="btn btn-sm btn-danger" id="trelloDisconnect">Disconnect</button>
-    </div>
-    <div class="sync-warn">Your Trello access is saved on this device in the app's local storage, unencrypted, and never uploaded to ARISE's cloud. You can revoke access any time from Trello's account settings.</div>
-
-    <div class="data-head" style="margin-top:18px;">Google Calendar</div>
-    <div class="sub">Use the OAuth credentials from your Google Cloud Desktop app. Tokens are stored securely in macOS Keychain.</div>
-    <div class="field"><label>OAuth client ID</label><input id="googleClientId" placeholder="…apps.googleusercontent.com" autocomplete="off" spellcheck="false"></div>
-    <div class="field"><label>OAuth client secret</label><input id="googleClientSecret" type="password" placeholder="Google client secret" autocomplete="off" spellcheck="false"></div>
-    <button class="btn btn-primary btn-sm" id="googleConnect">Connect Google</button><button class="btn btn-sm btn-danger" id="googleDisconnect" style="margin-left:6px">Disconnect</button>
-    <div id="googleStatus" class="ai-status">Checking connection…</div>
-
-    <div class="data-head" style="margin-top:18px;">ARISE account</div>
-    <div class="sub">Cloud sync is optional and private to this signed-in account. Projects, tasks, local calendar plans, goals, progress and health reminders can sync through Supabase. API keys, passwords, Google Calendar connections and device settings stay on each device.</div>
-    <div class="data-row cloud-auth-actions"><button class="btn btn-sm btn-danger" id="cloudSignOut">Sign out</button></div>
-    <div id="cloudStatus" class="ai-status">Not signed in.</div>
-    <div class="data-row cloud-auth-actions">
-      <button class="btn btn-primary btn-sm" id="cloudDataEnable" hidden>Turn on cloud sync</button>
-      <button class="btn btn-sm" id="cloudDataNow" hidden>Sync now</button>
-      <button class="btn btn-sm" id="cloudDataDisable" hidden>Turn off cloud sync</button>
-    </div>
-    <div id="cloudDataStatus" class="ai-status" role="status" aria-live="polite">Cloud sync is off.</div>
-    <div class="data-row cloud-auth-actions"><button class="btn btn-sm" type="button" id="pwaInstallSettings" hidden>Install ARISE</button></div>
-    <p id="pwaInstallSettingsHint" class="sync-hint" role="status" aria-live="polite"></p>
-    <div id="cloudDataConflict" class="cloud-migration" hidden>
-      <strong>Choose which copy to keep</strong><p id="cloudDataConflictText"></p>
-      <div class="data-row cloud-auth-actions"><button class="btn btn-sm" id="cloudDataUseDevice">Use this device</button><button class="btn btn-sm" id="cloudDataUseCloud">Use Supabase</button></div>
-    </div>
-
-    <div class="data-head" style="margin-top:18px;">Your data</div>
-    <div class="sync-hint">ARISE keeps a device copy even when cloud sync is on. Save a backup regularly; achievement photos are still device-only.</div>
-    <div class="data-row">
-      <button class="btn btn-sm" id="btnExportBackup">Save a backup now</button>
-      <button class="btn btn-sm" id="btnRevealBackups">Show in Finder</button>
-    </div>
-    <div class="data-row">
-      <select id="backupPick" class="all-sort" style="flex:1;min-width:150px;"></select>
-      <button class="btn btn-sm" id="btnImportBackup">Restore</button>
-    </div>
-    <div id="dataStatus" class="sync-status"></div>
-    <div id="backupInfo" class="sync-hint"></div>
-
-    <div class="modal-actions"><button class="btn" data-close>Close</button></div>
   </div>
 </div>
 
@@ -1343,6 +1375,7 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
 <script src="custom-reminders.js"></script>
 <script src="widget-snapshot.js"></script>
 <link rel="stylesheet" href="hand-control.css">
+<link rel="stylesheet" href="settings.css">
 <script src="hand-gestures.js"></script>
 <script src="hand-control.js"></script>
 <script src="cloud-config.js"></script>
