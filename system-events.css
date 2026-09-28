@@ -1,0 +1,68 @@
+/* Decorations are opt-in; no layout, input, visibility or data dependencies. */
+/* Drag feedback stays immediate even with effects disabled. */
+html[data-effects] .cal-drag-preview { opacity: .55; box-sizing: border-box; min-width: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  html:is([data-effects="system"], [data-effects="cinematic"]) {
+    --system-event-glow: #82caff;
+    --system-event-soft: #947cff;
+  }
+  html[data-theme="light"]:is([data-effects="system"], [data-effects="cinematic"]) {
+    --system-event-glow: #175aaf;
+    --system-event-soft: #6841bb;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-portal-open .node-ring {
+    animation: system-ring-activation 650ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-tree-reveal {
+    animation: system-tree-entry 500ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-portal-cleared .node-ring {
+    animation: system-portal-contract 650ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-task-complete {
+    animation: system-task-flash 350ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-connectors-pulse {
+    animation: system-connector-travel 400ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-task-complete::before {
+    animation: system-connector-travel 400ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) .system-parent-progress {
+    animation: system-parent-arrival 650ms ease-out;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) [data-system-nexus="listening"] {
+    outline: 2px solid var(--system-event-glow);
+    outline-offset: 3px;
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) [data-system-nexus="thinking"] {
+    box-shadow: 0 0 0 2px var(--system-event-soft), 0 0 18px var(--system-event-soft);
+  }
+  html:is([data-effects="system"], [data-effects="cinematic"]) [data-system-nexus="speaking"] {
+    outline: 3px double var(--system-event-glow);
+    outline-offset: 4px;
+    box-shadow: 0 0 16px var(--system-event-glow);
+  }
+  @keyframes system-ring-activation {
+    35% { box-shadow: 0 0 0 5px var(--system-event-soft), 0 0 26px var(--system-event-glow); filter: brightness(1.18); }
+  }
+  @keyframes system-portal-contract {
+    45% { transform: scale(.88); box-shadow: 0 0 24px var(--system-event-glow); }
+    75% { transform: scale(1.03); }
+  }
+  @keyframes system-tree-entry {
+    from { transform: translateY(5px); filter: brightness(1.2); }
+    to { transform: translateY(0); filter: brightness(1); }
+  }
+  @keyframes system-task-flash {
+    40% { box-shadow: inset 3px 0 var(--system-event-glow); }
+  }
+  @keyframes system-connector-travel {
+    15% { border-color: var(--system-event-glow); filter: drop-shadow(0 6px 3px var(--system-event-glow)); }
+    70% { border-color: var(--system-event-soft); filter: drop-shadow(0 -6px 3px var(--system-event-soft)); }
+  }
+  @keyframes system-parent-arrival {
+    0%, 60%, 100% { filter: none; }
+    78% { filter: drop-shadow(0 0 5px var(--system-event-glow)) brightness(1.2); }
+  }
+}

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARISE</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="ARISE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#05050d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05050d;
+  --bg-1:#0a0a18;
+  --panel:#0d0e21;
+  --panel-2:#12142e;
+  --border:#26284d;
+  --border-lit:#4b3fb8;
+  --primary:#7c5cff;
+  --primary-2:#4d7fff;
+  --glow:rgba(124,92,255,.55);
+  --text:#e7e6ff;
+  --text-dim:#8d8bb8;
+  --text-faint:#5c5a8a;
+  --gold:#ffd166;
+  --danger:#ff4d6d;
+  --success:#33e0a0;
+  --rank-e:#7d8590;
+  --rank-d:#33d17a;
+  --rank-c:#4d9fff;
+  --rank-b:#8b5cf6;
+  --rank-a:#e05cff;
+  --rank-s:#ffd166;
+  --sunken:#0a0a1c;
+  --raise:rgba(255,255,255,.02);
+  --raise-2:rgba(255,255,255,.04);
+  --hairline:rgba(255,255,255,.04);
+  --track:rgba(255,255,255,.08);
+  --shimmer:rgba(255,255,255,.5);
+  --scrim:rgba(2,2,10,.7);
+  --shadow-1:rgba(0,0,0,.6);
+  --shadow-2:rgba(0,0,0,.8);
+  --core-1:#3a2f8a;
+  --core-2:#0d0e21;
+  --avatar-core:#2a2660;
+  --avatar-edge:#0a0a18;
+  --on-accent:#fff;
+  --danger-soft:#ffb3c1;
+  --wash-1:rgba(124,92,255,.16);
+  --wash-2:rgba(77,127,255,.12);
+  --radius:14px;
+  --font-display:'Orbitron','Rajdhani',system-ui,sans-serif;
+  --font-body:'Rajdhani','Inter',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(1100px 600px at 15% -10%, var(--wash-1), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, var(--wash-2), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:16px;
+  letter-spacing:.2px;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--primary);color:#fff;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border-lit);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+a,button,input,select,textarea{font-family:inherit;color:inherit;}
+button{cursor:pointer;}
+
+.app{max-width:1180px;margin:0 auto;padding:22px 22px 80px;}
+
+/* ---------- HUD ---------- */
+.hud{
+  display:flex;align-items:center;gap:18px;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 20px;
+  position:relative;
+  box-shadow:0 0 0 1px rgba(124,92,255,.05), 0 20px 40px -20px var(--shadow-1);
+  overflow:hidden;
+}
+.hud::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--primary),var(--primary-2),transparent);
+  opacity:.06;pointer-events:none;
+}
+.hud-avatar{
+  width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:900;font-size:20px;
+  background:radial-gradient(circle at 35% 30%, var(--avatar-core), var(--avatar-edge));
+  border:2px solid var(--primary);
+  box-shadow:0 0 18px var(--glow), inset 0 0 12px rgba(124,92,255,.4);
+  flex:none;color:var(--text);
+}
+.hud-main{flex:1;min-width:0;}
+.hud-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.hud-name{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:1px;color:var(--text);}
+.hud-title{font-size:13px;color:var(--primary-2);font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.hud-level{margin-left:auto;font-family:var(--font-display);font-size:13px;color:var(--gold);font-weight:700;letter-spacing:1px;white-space:nowrap;}
+.xp-track{
+  margin-top:8px;height:10px;border-radius:6px;background:var(--sunken);
+  border:1px solid var(--border);overflow:hidden;position:relative;
+}
+.xp-fill{
+  height:100%;border-radius:6px;
+  background:linear-gradient(90deg,var(--primary-2),var(--primary));
+  box-shadow:0 0 12px var(--glow);
+  transition:width .5s cubic-bezier(.2,.8,.2,1);
+  position:relative;
+}
+.xp-fill::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,var(--shimmer),transparent);
+  width:40px;animation:shimmer 2.2s linear infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-40px);}100%{transform:translateX(220px);}}
+.xp-orb{position:fixed;z-index:250;width:8px;height:8px;border-radius:50%;pointer-events:none;background:var(--primary);box-shadow:0 0 8px var(--primary),0 0 16px var(--primary-2);}
+.xp-track.xp-impact{animation:xpImpact .45s ease-out;}
+@keyframes xpImpact{0%,100%{box-shadow:none;transform:scale(1)}45%{box-shadow:0 0 22px var(--glow);transform:scale(1.018)}}
+.xp-label{margin-top:5px;font-size:11.5px;color:var(--text-faint);letter-spacing:.5px;}
+.hud-stats{display:flex;gap:14px;flex:none;}
+.hud-stat{
+  text-align:center;padding:6px 12px;border-radius:10px;
+  background:var(--raise);border:1px solid var(--border);
+  min-width:64px;
+}
+.hud-stat .n{font-family:var(--font-display);font-weight:700;font-size:16px;}
+.hud-stat .l{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.8px;}
+.streak-fire{color:var(--gold);}
+
+/* ---------- NAV ---------- */
+.nav{display:flex;gap:8px;margin:20px 0 18px;flex-wrap:wrap;}
+.nav-btn{
+  background:var(--panel);border:1px solid var(--border);color:var(--text-dim);
+  padding:9px 16px;border-radius:10px;font-weight:600;font-size:13.5px;
+  letter-spacing:.4px;text-transform:uppercase;transition:.15s;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-btn:hover{color:var(--text);border-color:var(--border-lit);}
+.nav-btn.active{
+  background:linear-gradient(180deg,rgba(124,92,255,.22),rgba(124,92,255,.06));
+  border-color:var(--primary);color:var(--on-accent);box-shadow:0 0 16px -4px var(--glow);
+}
+.nav-badge{
+  background:var(--danger);color:#fff;font-size:10px;font-weight:700;
+  border-radius:20px;padding:1px 6px;line-height:1.4;
+}
+.nav-nexus{
+  margin-left:auto;width:42px;height:42px;min-width:42px;padding:0;border-radius:50%;
+  display:grid;place-items:center;background:radial-gradient(circle at 38% 30%,#9c89ff,#5a3fe0 52%,#22164e 78%);
+  border:1px solid #a894ff;color:#fff;font-size:20px;box-shadow:0 0 20px rgba(124,92,255,.45),inset 0 0 10px rgba(255,255,255,.13);
+  transition:.18s;
+}
+.nav-nexus:hover{transform:scale(1.07);box-shadow:0 0 28px rgba(124,92,255,.68),inset 0 0 12px rgba(255,255,255,.18);}
+.cal-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.cal-title{font-family:var(--font-display);font-weight:700;margin-right:auto}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:8px;overflow-x:auto;padding-bottom:8px}.cal-day{min-height:300px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px}.cal-day.today{border-color:var(--primary);box-shadow:0 0 16px -8px var(--glow)}.cal-day-head{font-size:11px;text-transform:uppercase;color:var(--text-faint);letter-spacing:.7px;margin-bottom:9px}.cal-day-head b{display:block;color:var(--text);font-size:19px;margin-top:2px}.cal-event{background:rgba(124,92,255,.14);border-left:3px solid var(--primary);border-radius:7px;padding:7px;margin:6px 0;font-size:11.5px;line-height:1.35}.cal-event.google{border-left-color:var(--primary-2)}.cal-event.protected{border-left-color:var(--gold);background:rgba(255,195,64,.1)}.cal-time{font-size:10px;color:var(--text-faint);margin-bottom:2px}.cal-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.cal-list-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px}.cal-task{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding:9px 0}.cal-task:last-child{border-bottom:0}.cal-task span{flex:1;font-size:12.5px}
+.cal-title{margin:0;min-width:145px;text-align:center}.cal-drag-time{min-width:92px;text-align:center;font-family:var(--font-display);font-weight:800;color:var(--primary-2);opacity:0;transition:.15s;text-shadow:0 0 12px var(--glow)}.cal-drag-time.show{opacity:1}.cal-grid{align-items:start}.cal-day{padding:8px;min-height:630px;transition:border-color .16s,box-shadow .16s}.cal-day.selected{border-color:#4d7fff;box-shadow:0 0 22px rgba(77,127,255,.5),inset 0 0 12px rgba(77,127,255,.09)}.cal-day.drag-over{border-color:var(--primary-2);background:rgba(77,127,255,.055)}.cal-day-body{height:560px;position:relative;border-radius:7px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--primary) var(--sunken)}.cal-time-canvas{height:960px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 59px,var(--border) 60px)}.cal-hour-label{position:absolute;left:3px;font-size:8px;color:var(--text-faint);transform:translateY(-5px);pointer-events:none}.cal-event{position:absolute;left:25px;right:2px;margin:0;z-index:2;cursor:grab;overflow:hidden;box-sizing:border-box;user-select:none;min-height:34px}.cal-event:active{cursor:grabbing}.cal-event:hover{filter:brightness(1.15);z-index:3}.cal-task[draggable="true"]{cursor:grab}.cal-task-title{cursor:pointer}.cal-task-title:hover{color:var(--primary-2)}
+.cal-grid,.cal-grid *,.cal-task{-webkit-user-select:none;user-select:none}.cal-task[data-drag-gate]{cursor:grab}.cal-drag-source{opacity:.28!important;filter:saturate(.55)!important;transform:scale(.985)!important;transition:opacity .14s,transform .14s,filter .14s;pointer-events:none!important}.cal-event.cal-drag-source{z-index:1}.backlog-task.cal-drag-source{background:rgba(124,92,255,.045)}body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;-webkit-user-select:none!important;user-select:none!important}
+.cal-bottom-spacer{height:560px;pointer-events:none}
+
+.view{display:none;animation:fadein .25s ease;}
+.view.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.section-title{font-family:var(--font-display);font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text);display:flex;align-items:center;gap:8px;}
+.section-sub{font-size:12.5px;color:var(--text-faint);margin-top:2px;}
+
+.btn{
+  background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  padding:9px 14px;border-radius:10px;font-weight:600;font-size:13px;
+  display:inline-flex;align-items:center;gap:6px;transition:.15s;
+}
+.btn:hover{border-color:var(--border-lit);}
+.btn-primary{
+  background:linear-gradient(180deg,var(--primary),#5a3fe0);border:1px solid var(--primary);
+  color:#fff;box-shadow:0 6px 20px -8px var(--glow);
+}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent;border:1px dashed var(--border);color:var(--text-dim);}
+.btn-danger{background:rgba(255,77,109,.12);border:1px solid rgba(255,77,109,.4);color:var(--danger-soft);}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ---------- Empty state ---------- */
+.empty{
+  border:1px dashed var(--border);border-radius:var(--radius);padding:40px 20px;
+  text-align:center;color:var(--text-faint);
+}
+.empty .glyph{font-size:34px;margin-bottom:10px;}
+
+/* ---------- Portal mindmap ---------- */
+.portal-stage{
+  position:relative;width:100%;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;
+  min-height:260px;overflow-x:auto;
+}
+.portal-lines{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;}
+.portal-line{
+  stroke:url(#portalLineGrad);stroke-width:1.5;opacity:.45;
+  stroke-dasharray:3 5;animation:dashflow 3s linear infinite;
+}
+.portal-line.active{opacity:.95;stroke-width:2;}
+@keyframes dashflow{to{stroke-dashoffset:-40;}}
+.portal-core{
+  position:absolute;transform:translate(-50%,-50%);
+  width:92px;height:92px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 40% 35%,var(--core-1),var(--core-2) 70%);
+  box-shadow:0 0 40px var(--glow), inset 0 0 20px rgba(124,92,255,.5);
+  z-index:2;
+}
+.portal-ring{
+  position:absolute;inset:-8px;border-radius:50%;
+  background:conic-gradient(from 0deg, var(--primary), var(--primary-2), transparent, var(--primary));
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  animation:spin 6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.portal-glyph{font-size:30px;filter:drop-shadow(0 0 8px var(--glow));animation:pulse 2.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.9;}50%{transform:scale(1.1);opacity:1;}}
+
+.dungeon-node{
+  position:absolute;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:none;border:none;cursor:pointer;z-index:2;width:104px;
+}
+.node-ring{
+  width:64px;height:64px;border-radius:50%;padding:4px;flex:none;
+  background:conic-gradient(var(--ring-color,var(--primary)) calc(var(--pct,0)*1%), var(--track) 0);
+  display:flex;align-items:center;justify-content:center;
+  transition:box-shadow .2s;
+}
+.node-ring-inner{
+  width:100%;height:100%;border-radius:50%;background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.dungeon-node:hover .node-ring,.dungeon-node.active .node-ring{box-shadow:0 0 18px -2px var(--glow);}
+.dungeon-node.active .node-ring-inner{border-color:var(--primary);}
+.node-label{font-family:var(--font-display);font-size:11.5px;font-weight:700;letter-spacing:.3px;text-align:center;line-height:1.25;max-width:104px;}
+.node-meta{font-size:10px;color:var(--text-faint);}
+
+/* ---------- Dungeon detail panel ---------- */
+.detail-panel{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:16px;overflow:hidden;
+}
+.detail-head{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.dungeon-emoji{font-size:22px;}
+.dungeon-name{font-family:var(--font-display);font-weight:700;font-size:14.5px;letter-spacing:.5px;flex:none;}
+.dungeon-meta{font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+.dungeon-progress{flex:1;min-width:120px;}
+.dungeon-actions{display:flex;gap:8px;flex:none;}
+.detail-body{padding:0 16px 16px 16px;}
+
+.mini-bar{height:8px;border-radius:5px;background:var(--sunken);border:1px solid var(--border);overflow:hidden;}
+.mini-fill{height:100%;border-radius:5px;transition:width .4s;}
+
+/* Gate = top level task */
+.tree{position:relative;padding-left:6px;}
+.gate{
+  position:relative;margin:10px 0;padding:12px 14px 12px 16px;
+  background:var(--raise);border:1px solid var(--border);
+  border-left:3px solid var(--rank-e);border-radius:10px;
+}
+.gate.cleared{opacity:.55;}
+.gate-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rank-badge{
+  font-family:var(--font-display);font-weight:900;font-size:12px;
+  width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  color:#0a0a18;flex:none;
+}
+.gate-title{font-weight:600;font-size:14.5px;flex:1;min-width:120px;}
+.gate-title.done{text-decoration:line-through;color:var(--text-faint);}
+.gate-due{font-size:11px;color:var(--text-faint);border:1px solid var(--border);padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.gate-due.urgent{color:var(--danger);border-color:rgba(255,77,109,.5);}
+.gate-progress-wrap{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.gate-progress-wrap .mini-bar{flex:1;}
+.gate-pct{font-size:11px;color:var(--text-faint);width:34px;text-align:right;flex:none;}
+.gate-toggle-actions{display:flex;gap:6px;flex:none;}
+
+.subtree{margin:10px 0 0 20px;padding-left:14px;border-left:1px dashed var(--border);}
+.sub{position:relative;display:flex;align-items:flex-start;gap:8px;padding:5px 0;}
+.sub::before{content:"";position:absolute;left:-15px;top:16px;width:12px;height:1px;background:var(--border);}
+.check{
+  width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border-lit);
+  flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;
+  transition:.15s;background:transparent;
+}
+.check.done{background:var(--success);border-color:var(--success);}
+.check.done::after{content:"✓";color:#04140c;font-size:12px;font-weight:900;}
+.sub-title{font-size:13.5px;flex:1;}
+.sub-title.done{text-decoration:line-through;color:var(--text-faint);}
+.sub-children{margin-left:26px;width:100%;}
+.sub-del{opacity:0;transition:.15s;background:none;border:none;color:var(--text-faint);font-size:14px;}
+.sub:hover .sub-del{opacity:1;}
+.add-sub-row{display:flex;gap:6px;margin-top:8px;margin-left:20px;}
+.add-sub-row input{flex:1;}
+
+input,select,textarea{
+  background:var(--sunken);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:8px 10px;font-size:13.5px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(124,92,255,.2);}
+
+/* ---------- All Tasks ---------- */
+.nav-count{background:var(--border-lit);}
+.all-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.all-search{flex:1;min-width:180px;}
+.all-sort{flex:none;font-size:12.5px;padding:8px 10px;}
+.chip-row{display:flex;gap:4px;background:var(--sunken);border:1px solid var(--border);border-radius:9px;padding:3px;}
+.chip{
+  background:none;border:none;color:var(--text-faint);font-size:12px;font-weight:600;
+  padding:5px 11px;border-radius:7px;transition:.15s;
+}
+.chip:hover{color:var(--text);}
+.chip.active{background:rgba(124,92,255,.22);color:var(--on-accent);}
+
+.tg{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);border-left:3px solid var(--rank-e);
+  border-radius:11px;padding:11px 14px;margin-bottom:9px;
+}
+.tg.cleared{opacity:.5;}
+.tg-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.tg-caret{background:none;border:none;color:var(--text-faint);font-size:11px;width:14px;flex:none;transition:transform .15s;}
+.tg.open .tg-caret{transform:rotate(90deg);}
+.tg-title{font-weight:600;font-size:14px;flex:1;min-width:130px;}
+.tg-title.done{text-decoration:line-through;color:var(--text-faint);}
+.tg-home{
+  font-size:11px;color:var(--text-dim);background:var(--raise-2);
+  border:1px solid var(--border);border-radius:20px;padding:2px 9px;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:5px;cursor:pointer;
+}
+.tg-home:hover{border-color:var(--primary);color:var(--text);}
+.tg-meta{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.tg-meta .mini-bar{flex:1;}
+.tg-pct{font-size:11px;color:var(--text-faint);width:52px;text-align:right;flex:none;}
+.tg-subs{display:none;margin:10px 0 2px 26px;padding-left:14px;border-left:1px dashed var(--border);}
+.tg.open .tg-subs{display:block;}
+.tg-empty{font-size:12px;color:var(--text-faint);padding:4px 0;}
+.all-group-head{
+  font-family:var(--font-display);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-dim);margin:16px 0 8px;display:flex;align-items:center;gap:8px;
+}
+.all-group-head:first-child{margin-top:0;}
+.all-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+.all-stat{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--border);
+  border-radius:10px;padding:9px 14px;min-width:82px;
+}
+.all-stat .n{font-family:var(--font-display);font-weight:700;font-size:17px;}
+.all-stat .l{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.7px;}
+
+/* ---------- Daily quests ---------- */
+.daily-card{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;
+}
+.daily-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--hairline);}
+.daily-row:last-child{border-bottom:none;}
+.daily-text{flex:1;font-size:14.5px;}
+.daily-text.done{text-decoration:line-through;color:var(--text-faint);}
+.penalty-banner{
+  background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.4);
+  color:var(--danger-soft);padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.streak-banner{
+  background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.35);
+  color:var(--gold);padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.add-daily-row{display:flex;gap:8px;margin-top:10px;}
+.add-daily-row input{flex:1;}
+
+/* ---------- Focus / Pomodoro ---------- */
+.focus-wrap{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;}
+.timer-card{
+  flex:1;min-width:280px;background:radial-gradient(circle at 50% 20%, rgba(124,92,255,.12), transparent 60%),linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);border-radius:var(--radius);padding:28px;text-align:center;
+}
+.timer-mode{font-family:var(--font-display);letter-spacing:2px;font-size:12px;color:var(--primary-2);text-transform:uppercase;margin-bottom:6px;}
+.timer-display{font-family:var(--font-display);font-size:64px;font-weight:700;letter-spacing:2px;text-shadow:0 0 30px var(--glow);}
+.timer-ring{width:180px;height:180px;margin:14px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;}
+.timer-controls{display:flex;gap:10px;justify-content:center;margin-top:18px;}
+.rest-card{
+  flex:1;min-width:260px;background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border);border-radius:var(--radius);padding:20px;
+}
+.rest-quest{
+  display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;
+  background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.3);margin-top:10px;
+}
+.focus-stats{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.focus-stats .hud-stat{flex:1;min-width:80px;}
+
+/* ---------- Shadow army ---------- */
+.army-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.shadow-card{
+  aspect-ratio:3/4;border-radius:12px;border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));gap:8px;padding:10px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.shadow-card.locked{opacity:.35;filter:grayscale(1);}
+.shadow-card .glyph{font-size:30px;}
+.shadow-card .name{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.5px;}
+.shadow-card .rank{font-size:10px;color:var(--text-faint);}
+.shadow-card.unlocked{box-shadow:inset 0 0 40px -10px var(--glow);}
+
+/* ---------- Modal ---------- */
+.overlay{
+  position:fixed;inset:0;background:var(--scrim);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;z-index:60;padding:20px;
+}
+.overlay.show{display:flex;}
+.modal{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border-lit);border-radius:var(--radius);
+  padding:22px;width:100%;max-width:420px;box-shadow:0 30px 80px -20px var(--shadow-2), 0 0 40px -10px var(--glow);
+  animation:modalin .2s ease;
+  /* Settings is long — keep it scrollable so the top never goes off-screen. */
+  max-height:86vh;overflow-y:auto;
+}
+@keyframes modalin{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:none;}}
+.modal h3{margin:0 0 4px;font-family:var(--font-display);font-size:15px;letter-spacing:1px;}
+.modal .sub{color:var(--text-faint);font-size:12px;margin-bottom:16px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:5px;font-weight:600;}
+.field input,.field select{width:100%;}
+.slider-row{display:flex;align-items:center;gap:10px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--primary);}
+.slider-val{width:20px;text-align:center;font-weight:700;color:var(--primary-2);}
+.slider-3{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:8px;}
+.score-preview{
+  margin-top:10px;padding:10px;border-radius:10px;background:rgba(124,92,255,.08);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12.5px;
+}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+
+/* Level up celebration */
+.levelup-overlay{
+  position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(124,92,255,.35), rgba(2,2,10,.9));
+}
+.levelup-overlay.show{display:flex;}
+.levelup-box{text-align:center;animation:levelpop .5s cubic-bezier(.2,1.4,.4,1);}
+@keyframes levelpop{0%{opacity:0;transform:scale(.5);}70%{transform:scale(1.08);}100%{opacity:1;transform:scale(1);}}
+.levelup-box .arise{font-family:var(--font-display);font-size:13px;letter-spacing:6px;color:var(--primary-2);text-transform:uppercase;margin-bottom:10px;}
+.levelup-box .lvl{font-family:var(--font-display);font-size:72px;font-weight:900;color:var(--gold);text-shadow:0 0 60px rgba(255,209,102,.7);}
+.levelup-box .title{font-size:16px;color:var(--text);margin-top:8px;letter-spacing:1px;}
+
+/* Toasts */
+.toasts{position:fixed;top:18px;right:18px;z-index:90;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--panel-2);border:1px solid var(--border-lit);border-radius:10px;
+  padding:10px 16px;font-size:13px;font-weight:600;box-shadow:0 10px 30px -10px var(--shadow-1);
+  animation:toastin .25s ease, toastout .3s ease 2.4s forwards;
+  display:flex;align-items:center;gap:8px;
+}
+@keyframes toastin{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:none;}}
+@keyframes toastout{to{opacity:0;transform:translateX(30px);}}
+.toast.xp{color:var(--primary-2);}
+.toast.gold{color:var(--gold);}
+.toast.danger{color:var(--danger);}
+
+/* ---------- Voice assistant ---------- */
+.voice-dock{position:fixed;right:22px;bottom:22px;z-index:70;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.voice-fab{
+  position:relative;flex:none;width:60px;height:60px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#3a2f8a,#0d0e21 70%);
+  border:2px solid var(--primary);color:var(--text);
+  box-shadow:0 0 20px var(--glow), inset 0 0 14px rgba(124,92,255,.45);
+  font-size:24px;display:flex;align-items:center;justify-content:center;transition:transform .15s,border-color .2s,box-shadow .2s;
+}
+.voice-fab:hover{transform:scale(1.06);}
+.voice-fab::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--primary);opacity:0;pointer-events:none;}
+.voice-fab.listening{border-color:var(--danger);box-shadow:0 0 26px rgba(255,77,109,.55), inset 0 0 14px rgba(255,77,109,.35);}
+.voice-fab.listening::after{border-color:var(--danger);animation:ringpulse 1.3s ease-out infinite;}
+@keyframes ringpulse{0%{opacity:.65;transform:scale(1);}100%{opacity:0;transform:scale(1.7);}}
+.voice-fab.unsupported{opacity:.35;cursor:not-allowed;}
+.voice-fab.wake-armed{border-color:var(--primary-2);box-shadow:0 0 22px rgba(77,127,255,.5), inset 0 0 14px rgba(77,127,255,.4);}
+.voice-fab.wake-armed::after{border-color:var(--primary-2);animation:ringpulse 2.6s ease-out infinite;}
+.wake-toggle{
+  flex:none;background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);
+  padding:7px 13px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.3px;
+  transition:.15s;white-space:nowrap;
+}
+.wake-toggle:hover{border-color:var(--border-lit);color:var(--text);}
+.wake-toggle.on{border-color:var(--primary-2);color:var(--primary-2);background:rgba(77,127,255,.1);box-shadow:0 0 12px -4px rgba(77,127,255,.6);}
+.wake-toggle.unsupported{opacity:.35;cursor:not-allowed;}
+.voice-row{display:flex;align-items:center;gap:8px;}
+.cheat-toggle{
+  width:30px;height:30px;border-radius:50%;flex:none;
+  background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);
+  font-weight:700;font-size:14px;transition:.15s;
+}
+.cheat-toggle:hover{border-color:var(--primary);color:var(--text);}
+.cheat-sheet{
+  display:none;width:330px;max-height:60vh;overflow-y:auto;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--border-lit);border-radius:14px;padding:14px 16px;
+  box-shadow:0 20px 50px -18px var(--shadow-2), 0 0 30px -12px var(--glow);
+}
+.cheat-sheet.show{display:block;}
+.cheat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.cheat-head span{font-family:var(--font-display);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text);}
+.cheat-close{background:none;border:none;color:var(--text-faint);font-size:13px;}
+.cheat-close:hover{color:var(--text);}
+.cheat-hint{font-size:11.5px;color:var(--text-faint);margin-bottom:10px;line-height:1.5;}
+.cheat-hint b{color:var(--primary-2);}
+.voice-settings{border-top:1px solid var(--border);padding:11px 0 2px;margin-top:8px;}
+#voiceSubSettings{padding-left:22px;border-left:2px solid var(--border);margin:4px 0 2px;}
+#voiceSubSettings.disabled{opacity:.4;pointer-events:none;}
+.voice-settings label{display:block;font-size:11px;color:var(--text-dim);font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.voice-settings select{width:100%;font-size:12.5px;padding:6px 8px;}
+.rate-row{display:flex;align-items:center;gap:7px;margin-top:8px;}
+.rate-row span{font-size:11px;color:var(--text-faint);white-space:nowrap;}
+.rate-row input[type=range]{flex:1;accent-color:var(--primary);min-width:0;}
+.voice-tip{font-size:10.5px;color:var(--text-faint);line-height:1.5;margin-top:9px;}
+.voice-tip b{color:var(--text-dim);}
+.cheat-sheet ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;}
+.cheat-sheet li{font-size:12px;line-height:1.45;color:var(--text-dim);padding-left:12px;position:relative;}
+.cheat-sheet li::before{content:"›";position:absolute;left:0;color:var(--primary);}
+.cheat-sheet li b{color:var(--text);font-weight:600;}
+.cheat-sheet li i{color:var(--text-faint);font-style:normal;font-size:11px;}
+.voice-panel{display:flex;flex-direction:column;gap:6px;align-items:flex-end;max-width:300px;}
+.voice-msg{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:12px;
+  padding:9px 13px;font-size:12.5px;line-height:1.4;color:var(--text);
+  box-shadow:0 10px 26px -10px var(--shadow-1);animation:toastin .2s ease;max-width:100%;
+}
+.voice-msg.heard{color:var(--text-dim);font-style:italic;border-color:var(--border-lit);}
+.voice-msg.reply{border-color:var(--primary);}
+.voice-msg.error{color:var(--danger-soft);border-color:rgba(255,77,109,.4);}
+.voice-msg.fadeout{animation:toastout .3s ease forwards;}
+
+/* ---------- Light mode ---------- */
+:root[data-theme="light"]{
+  --bg:#f2f2fa;
+  --bg-1:#e9e9f6;
+  --panel:#ffffff;
+  --panel-2:#f8f8fd;
+  --border:#dcdcec;
+  --border-lit:#b3a6f2;
+  --primary:#6236ee;
+  --primary-2:#2a66e8;
+  --glow:rgba(98,54,238,.30);
+  --text:#14142e;
+  --text-dim:#54547a;
+  --text-faint:#6a6a8c;
+  --gold:#b07d12;
+  --danger:#d42548;
+  --success:#0f9463;
+  --rank-e:#6b7280;
+  --rank-d:#0f9455;
+  --rank-c:#2a72d8;
+  --rank-b:#6d3fd4;
+  --rank-a:#b336cc;
+  --rank-s:#bd8410;
+  --sunken:#edeef7;
+  --raise:rgba(20,20,60,.028);
+  --raise-2:rgba(20,20,60,.05);
+  --hairline:rgba(20,20,60,.07);
+  --track:rgba(20,20,60,.10);
+  --shimmer:rgba(255,255,255,.65);
+  --scrim:rgba(28,28,60,.42);
+  --shadow-1:rgba(30,30,70,.16);
+  --shadow-2:rgba(30,30,70,.24);
+  --core-1:#b9a8ff;
+  --core-2:#e6e2ff;
+  --avatar-core:#d9d0ff;
+  --avatar-edge:#f3f0ff;
+  --on-accent:#3b1fa8;
+  --danger-soft:#a3132f;
+  --wash-1:rgba(124,92,255,.10);
+  --wash-2:rgba(77,127,255,.08);
+}
+/* Glow reads as haze on white — trade it for crisper edges and real shadows. */
+:root[data-theme="light"] .hud,
+:root[data-theme="light"] .detail-panel,
+:root[data-theme="light"] .daily-card,
+:root[data-theme="light"] .timer-card,
+:root[data-theme="light"] .rest-card,
+:root[data-theme="light"] .tg,
+:root[data-theme="light"] .shadow-card{
+  box-shadow:0 1px 2px rgba(30,30,70,.05), 0 6px 18px -12px rgba(30,30,70,.28);
+}
+:root[data-theme="light"] .portal-core{
+  box-shadow:0 0 28px rgba(98,54,238,.22), inset 0 0 18px rgba(98,54,238,.14);
+}
+:root[data-theme="light"] .hud-avatar,
+:root[data-theme="light"] .voice-fab{
+  box-shadow:0 2px 10px rgba(98,54,238,.22), inset 0 0 10px rgba(98,54,238,.10);
+}
+:root[data-theme="light"] .portal-line{opacity:.55;}
+:root[data-theme="light"] .rank-badge{color:#fff;}
+:root[data-theme="light"] .nav-btn.active{
+  background:linear-gradient(180deg,rgba(98,54,238,.14),rgba(98,54,238,.05));
+}
+:root[data-theme="light"] .chip.active{background:rgba(98,54,238,.14);}
+:root[data-theme="light"] .btn-primary,
+:root[data-theme="light"] .nav-badge{color:#fff;}
+:root[data-theme="light"] .shadow-card.locked{opacity:.5;}
+:root[data-theme="light"] .penalty-banner{background:rgba(212,37,72,.07);}
+:root[data-theme="light"] .streak-banner{background:rgba(176,125,18,.09);}
+:root[data-theme="light"] .btn-danger{background:rgba(212,37,72,.08);border-color:rgba(212,37,72,.32);}
+
+/* Trello sync */
+.sync-modal{max-width:460px;}
+.sync-link{color:var(--primary-2);font-size:11px;font-weight:600;text-decoration:none;margin-left:6px;}
+.sync-link:hover{text-decoration:underline;}
+.sync-hint{font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.5;}
+.sync-hint b{color:var(--text-dim);}
+.sync-status{font-size:12px;margin-top:11px;min-height:16px;color:var(--text-dim);}
+.sync-status.ok{color:var(--success);}
+.sync-status.err{color:var(--danger);}
+.sync-label{font-size:11px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;}
+.board-list{max-height:190px;overflow-y:auto;}
+.board-row{display:flex;align-items:center;gap:9px;padding:6px 2px;font-size:13px;cursor:pointer;}
+.board-row input{accent-color:var(--primary);}
+.sync-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;
+  padding-top:11px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-faint);}
+.sync-warn{font-size:10.5px;color:var(--text-faint);line-height:1.5;margin-top:10px;
+  background:var(--raise);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.data-head{font-family:var(--font-display);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--primary-2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.data-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;}
+.inline-edit{
+  font:inherit;font-weight:600;padding:3px 7px;border-radius:6px;
+  border:1px solid var(--primary);background:var(--sunken);color:var(--text);
+  min-width:160px;max-width:100%;
+}
+.sub-edit{
+  opacity:0;transition:.15s;background:none;border:none;color:var(--text-faint);font-size:12px;
+}
+.sub:hover .sub-edit{opacity:1;}
+.sub-edit:hover{color:var(--primary-2);}
+.tg-edit{opacity:.55;padding:3px 8px;}
+.tg-edit:hover{opacity:1;}
+.sub-title[data-rename-sub]{cursor:text;}
+.sync-sub{color:var(--text-faint);font-size:11px;}
+@keyframes spin360{to{transform:rotate(360deg);}}
+.theme-toggle.spinning{animation:spin360 1s linear infinite;color:var(--primary-2);border-color:var(--primary);}
+.src-tag{
+  font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--primary-2);border:1px solid var(--border-lit);border-radius:4px;
+  padding:1px 5px;flex:none;
+}
+
+/* Theme switch */
+.theme-toggle{
+  flex:none;width:34px;height:34px;border-radius:10px;
+  background:var(--raise);border:1px solid var(--border);color:var(--text-dim);
+  font-size:15px;display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.theme-toggle:hover{border-color:var(--primary);color:var(--text);}
+.nexus-card{background:linear-gradient(145deg,var(--raise),var(--surface));border:1px solid var(--border-lit);border-radius:16px;padding:22px;box-shadow:0 0 28px rgba(106,76,255,.08);}
+.nexus-orb{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:27px;background:radial-gradient(circle,#8f7cff 0,#4934ba 48%,#16102f 74%);box-shadow:0 0 28px rgba(130,99,255,.55);margin-bottom:14px;}
+.nexus-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0;}
+.nexus-question{display:flex;gap:8px;margin-top:12px;}
+.nexus-question input{flex:1;}
+.nexus-answer{white-space:pre-wrap;line-height:1.65;color:var(--text);border-left:3px solid var(--primary);padding:14px 16px;background:var(--surface);border-radius:0 10px 10px 0;min-height:58px;}
+.nexus-answer.loading{color:var(--text-dim);animation:pulse 1.2s ease-in-out infinite;}
+.ai-status{font-size:12px;color:var(--text-dim);margin:7px 0;}
+.ai-status.ok{color:var(--success);}.ai-status.err{color:var(--danger-soft);}
+.nexus-drawer-backdrop{position:fixed;inset:0;background:rgba(4,3,12,.48);z-index:79;opacity:0;pointer-events:none;transition:opacity .22s;}
+.nexus-drawer-backdrop.show{opacity:1;pointer-events:auto;}
+.nexus-drawer{position:fixed;z-index:80;right:0;top:0;bottom:0;width:min(440px,94vw);padding:24px;background:var(--bg);border-left:1px solid var(--border-lit);box-shadow:-20px 0 55px rgba(0,0,0,.38);transform:translateX(105%);transition:transform .25s ease;overflow-y:auto;}
+.nexus-drawer.show{transform:translateX(0);}
+.nexus-drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:18px;}
+.nexus-drawer-close{width:34px;height:34px;border-radius:9px;background:var(--raise);border:1px solid var(--border);color:var(--text);font-size:18px;flex:none;}
+
+/* ---------- Calendar command center ---------- */
+#view-calendar{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;}
+.calendar-shell{border:1px solid rgba(255,255,255,.09);border-radius:22px;background:linear-gradient(160deg,rgba(18,18,32,.94),rgba(7,7,15,.96));box-shadow:0 24px 80px rgba(0,0,0,.3);overflow:hidden;}
+.calendar-topbar{display:flex;align-items:center;gap:14px;padding:18px 20px;border-bottom:1px solid var(--hairline);background:rgba(255,255,255,.018);}
+.cal-heading{min-width:230px;margin-right:auto;}.cal-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;color:#9f8cff;margin-bottom:4px;}
+.cal-title{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-size:24px;font-weight:650;letter-spacing:-.6px;text-align:left;min-width:0;color:#f6f4ff;}
+.cal-nav-group,.cal-view-switch,.cal-filter-row{display:flex;align-items:center;gap:6px;}
+.cal-icon-btn{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(255,255,255,.035);font-size:17px;color:var(--text-dim);transition:.18s ease;}
+.cal-icon-btn:hover{color:#fff;border-color:rgba(157,130,255,.5);background:rgba(124,92,255,.1);}.cal-today-btn{height:34px;padding:0 13px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.045);font-weight:650;font-size:12px;}
+.cal-view-switch{padding:3px;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.07);border-radius:11px;}.cal-view-btn{border:0;background:transparent;border-radius:8px;padding:7px 11px;color:var(--text-faint);font-size:11px;font-weight:650;transition:.18s;}.cal-view-btn.active{background:rgba(255,255,255,.09);color:#fff;box-shadow:0 1px 7px rgba(0,0,0,.3);}
+.cal-add-btn{border:0;border-radius:11px;padding:9px 14px;color:#fff;background:linear-gradient(180deg,#866cff,#6748e8);font-weight:700;box-shadow:0 8px 20px rgba(77,46,190,.28);}
+.cal-quick{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--hairline);background:rgba(4,4,10,.34);}.cal-quick-icon{color:#8f79ff;font-size:16px;}.cal-quick input{flex:1;border:0!important;background:transparent!important;padding:7px 2px!important;font-size:13px!important;box-shadow:none!important;}.cal-quick input:focus{outline:0;}.cal-quick-hint{color:var(--text-faint);font-size:10.5px;white-space:nowrap;}
+.cal-insights{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.55fr);gap:12px;padding:14px 20px;border-bottom:1px solid var(--hairline);}.victories-card,.capacity-card{border:1px solid rgba(255,255,255,.075);border-radius:14px;padding:13px 15px;background:rgba(255,255,255,.025);}.cal-card-label{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);margin-bottom:9px;}
+.victory-row{display:grid;grid-template-columns:18px 1fr;align-items:center;gap:7px;}.victory-row+.victory-row{margin-top:5px;}.victory-num{width:17px;height:17px;display:grid;place-items:center;border-radius:50%;background:rgba(124,92,255,.14);color:#a896ff;font-size:9px;font-weight:800;}.victory-input{border:0!important;background:transparent!important;padding:4px 2px!important;font-size:12px!important;min-width:0;}.victory-input:focus{outline:0;color:#fff;}
+.capacity-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}.capacity-hours{font-size:21px;font-weight:700;letter-spacing:-.4px;}.capacity-hours small{font-size:11px;color:var(--text-faint);font-weight:550;}.capacity-meter{height:6px;border-radius:99px;background:rgba(255,255,255,.075);overflow:hidden;margin:9px 0 8px;}.capacity-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#7760ea,#9f87ff);transition:width .35s ease;}.capacity-fill.warn{background:linear-gradient(90deg,#e49a49,#ff6f70);}.capacity-note{font-size:10.5px;line-height:1.4;color:var(--text-faint);}
+.calendar-workspace{position:relative;display:block;min-height:650px}.cal-backlog{position:absolute;z-index:80;left:12px;top:12px;bottom:12px;width:min(310px,calc(100% - 24px));padding:16px 14px;border:1px solid rgba(153,131,255,.22);border-radius:16px;background:rgba(10,10,20,.97);box-shadow:0 22px 70px rgba(0,0,0,.5),0 0 32px rgba(76,59,180,.12);overflow-y:auto;transform:translateX(calc(-100% - 28px));opacity:0;pointer-events:none;transition:transform .26s cubic-bezier(.22,.8,.22,1),opacity .2s;backdrop-filter:blur(22px)}.calendar-workspace.backlog-open .cal-backlog{transform:none;opacity:1;pointer-events:auto}.cal-backlog-backdrop{position:absolute;z-index:79;inset:0;background:rgba(2,2,8,.34);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .2s}.calendar-workspace.backlog-open .cal-backlog-backdrop{opacity:1;pointer-events:auto}.cal-backlog-trigger{display:inline-flex;align-items:center;gap:7px;width:auto!important;padding:0 11px!important;font-size:10.5px!important;color:var(--text-dim)}.cal-backlog-trigger::before{content:"☰";font-size:12px;color:#9d89ff}
+.backlog-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 3px 12px;}.backlog-title{font-size:12px;font-weight:700;letter-spacing:.2px;}.backlog-section{margin-bottom:16px;}.backlog-section-head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 7px;color:var(--text-faint);font-size:9.5px;font-weight:750;letter-spacing:1.1px;text-transform:uppercase;}.backlog-count{font-size:9px;min-width:18px;text-align:center;padding:2px 5px;background:rgba(255,255,255,.05);border-radius:99px;}
+.backlog-task{position:relative;margin-bottom:7px;padding:10px 9px 9px;border:1px solid rgba(255,255,255,.075);border-radius:11px;background:rgba(255,255,255,.027);cursor:grab;transition:transform .16s,border-color .16s,background .16s;}.backlog-task:hover{transform:translateY(-1px);border-color:rgba(136,108,255,.36);background:rgba(124,92,255,.055);}.backlog-task-top{display:flex;align-items:flex-start;gap:7px;}.backlog-rank{width:20px;height:20px;display:grid;place-items:center;border-radius:6px;color:#fff;font-size:9px;font-weight:850;flex:none;}.backlog-task-title{font-size:11.5px;font-weight:650;line-height:1.28;flex:1;}.backlog-meta{display:flex;align-items:center;gap:6px;margin:7px 0 0 27px;color:var(--text-faint);font-size:9.5px;}.backlog-dot{width:2px;height:2px;border-radius:50%;background:currentColor;}.backlog-schedule{position:absolute;right:7px;bottom:6px;opacity:0;border:0;background:rgba(124,92,255,.17);color:#c9bdff;border-radius:7px;font-size:9px;padding:4px 6px;transition:.15s;}.backlog-task:hover .backlog-schedule,.backlog-schedule:focus{opacity:1;}
+.cal-main{min-width:0;overflow:hidden;}.cal-filterbar{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 14px;border-bottom:1px solid var(--hairline);}.cal-filter-row{margin-left:auto;overflow-x:auto;}.cal-check{display:flex;align-items:center;gap:6px;color:var(--text-faint);font-size:10.5px;white-space:nowrap;cursor:pointer;}.cal-check input{accent-color:#8268ff;}.cal-drag-time{margin-left:4px;min-width:68px;text-align:center;font-weight:700;color:#9e8aff;opacity:0;font-size:11px;}.cal-drag-time.show{opacity:1;}
+.cal-date-strip{display:none;gap:7px;padding:10px 12px;border-bottom:1px solid var(--hairline);overflow-x:auto;}.cal-date-pill{min-width:52px;border:1px solid transparent;background:transparent;border-radius:12px;padding:7px 8px;color:var(--text-faint);text-align:center;}.cal-date-pill span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.8px;}.cal-date-pill b{display:block;font-size:16px;margin-top:2px;color:var(--text-dim);}.cal-date-pill.active{background:rgba(124,92,255,.13);border-color:rgba(142,117,255,.32);}.cal-date-pill.active b,.cal-date-pill.today b{color:#fff;}
+.cal-grid{display:grid;grid-template-columns:repeat(var(--cal-days,7),minmax(145px,1fr));gap:0;overflow-x:auto;padding:0;align-items:start;background:rgba(0,0,0,.12);}.cal-day{min-height:620px;border:0;border-right:1px solid var(--hairline);border-radius:0;padding:0;background:transparent;transition:.16s;}.cal-day:last-child{border-right:0;}.cal-day.today,.cal-day.selected{box-shadow:inset 0 2px 0 #8269f2;background:rgba(124,92,255,.025);}.cal-day.drag-over{background:rgba(124,92,255,.07);box-shadow:inset 0 0 0 1px rgba(140,115,255,.45);}
+.cal-day-head{height:58px;display:flex;align-items:center;justify-content:center;gap:7px;margin:0;padding:9px 8px;border-bottom:1px solid var(--hairline);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);position:sticky;top:0;background:rgba(10,10,19,.94);backdrop-filter:blur(14px);z-index:8;}.cal-day-head b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;font-size:14px;color:var(--text-dim);}.cal-day.today .cal-day-head b{background:#7f65ef;color:white;box-shadow:0 0 18px rgba(124,92,255,.3);}
+.cal-day-body{height:562px;position:relative;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(124,92,255,.35) transparent;}.cal-time-canvas{height:1080px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 59px,rgba(255,255,255,.055) 60px);}.cal-hour-label{position:absolute;left:5px;font-size:8px;color:rgba(170,167,196,.5);transform:translateY(-5px);pointer-events:none;}
+.cal-event{position:absolute;left:26px;right:5px;margin:0;z-index:2;cursor:grab;overflow:hidden;box-sizing:border-box;user-select:none;min-height:34px;padding:7px 8px;border:1px solid rgba(143,117,255,.23);border-left:2px solid #8c72ff;border-radius:8px;background:linear-gradient(135deg,rgba(91,67,183,.32),rgba(48,38,100,.22));font-size:10px;line-height:1.22;box-shadow:0 6px 15px rgba(0,0,0,.12);transition:filter .14s,transform .14s,border-color .14s;}.cal-event:hover{filter:brightness(1.15);transform:translateY(-1px);z-index:4;border-color:rgba(168,146,255,.5);}.cal-event.protected{border-left-color:#d8ae55;background:linear-gradient(135deg,rgba(156,112,29,.27),rgba(76,54,21,.18));}.cal-event.break-event{border-left-color:#4eafa2;background:rgba(38,112,102,.18);}.cal-event.completed{opacity:.5;filter:saturate(.55);}.cal-time{font-size:8.5px;color:rgba(220,216,240,.62);margin-bottom:3px;}.cal-event-title{font-weight:700;color:#f7f5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.cal-event-meta{display:flex;gap:5px;align-items:center;margin-top:4px;color:rgba(221,216,241,.58);font-size:8px;white-space:nowrap;overflow:hidden;}
+.cal-rhythm-btn{width:auto;min-width:76px;height:30px;padding:0 9px;font-size:10px;font-weight:700;color:var(--text-faint)}.cal-rhythm-btn.active{color:#c8bcff;border-color:rgba(142,117,255,.42);background:rgba(124,92,255,.11)}
+.cal-day-head span{display:flex;flex-direction:column;gap:2px;min-width:0}.cal-day-head em{font-style:normal}.cal-day-head small{font-size:7px;letter-spacing:.45px;color:#9685df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px}
+.cal-event.routine-styled{border-left-color:#b784c8;background:linear-gradient(135deg,rgba(128,73,145,.28),rgba(66,39,80,.2))}.cal-event.routine-mediant{border-left-color:#678fda;background:linear-gradient(135deg,rgba(54,91,154,.27),rgba(32,50,88,.18))}.cal-event.routine-learning{border-left-color:#d6985e;background:linear-gradient(135deg,rgba(144,91,44,.25),rgba(77,49,28,.18))}.cal-event.routine-career{border-left-color:#6eaab2;background:linear-gradient(135deg,rgba(47,111,120,.24),rgba(27,66,72,.17))}.cal-event.routine-wellbeing{border-left-color:#67a979;background:linear-gradient(135deg,rgba(47,111,68,.2),rgba(30,67,41,.15))}.cal-event.routine-planning{border-left-color:#9a83de}.overview-event.routine-event{border-left:2px solid #8c72ff}
+.cal-now-line{position:absolute;left:18px;right:0;height:1px;background:#d56e9e;z-index:6;pointer-events:none;box-shadow:0 0 7px rgba(213,110,158,.5);}.cal-now-line::before{content:"";position:absolute;left:-3px;top:-3px;width:7px;height:7px;border-radius:50%;background:#e978aa;}.cal-overview-grid{padding:12px;display:grid;grid-template-columns:repeat(var(--cal-days,7),minmax(150px,1fr));gap:8px;overflow-x:auto;}.cal-overview-grid .cal-day{min-height:300px;border:1px solid var(--hairline);border-radius:13px;padding:10px;background:rgba(255,255,255,.018);}.cal-overview-grid .cal-day-head{position:static;background:transparent;border:0;height:44px;justify-content:flex-start;padding:2px 3px 9px;}.overview-event{padding:8px;margin-bottom:6px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(124,92,255,.07);font-size:10px;}.overview-event .cal-time{margin-bottom:2px;}.overview-empty{padding:10px 4px;color:var(--text-faint);font-size:10px;}
+.cal-empty-backlog{padding:18px 8px;text-align:center;color:var(--text-faint);font-size:10.5px;line-height:1.5;}.calendar-detail-backdrop{position:fixed;inset:0;z-index:94;background:rgba(0,0,0,.28);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .22s;}.calendar-detail-backdrop.show{opacity:1;pointer-events:auto;}.calendar-detail-drawer{position:fixed;z-index:95;right:0;top:0;bottom:0;width:min(410px,94vw);padding:22px;background:rgba(12,12,22,.97);border-left:1px solid rgba(161,137,255,.26);box-shadow:-24px 0 70px rgba(0,0,0,.42);transform:translateX(103%);transition:transform .28s cubic-bezier(.22,.8,.22,1);overflow-y:auto;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;}.calendar-detail-drawer.show{transform:none;}.calendar-detail-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}.calendar-detail-kicker{font-size:9px;font-weight:750;letter-spacing:1.4px;text-transform:uppercase;color:#9f8aff;margin-bottom:6px;}.calendar-detail-head h3{margin:0;font-size:21px;letter-spacing:-.35px;}.calendar-detail-close{border:0;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);color:var(--text-dim);font-size:17px;}.calendar-detail-drawer .field{margin-bottom:16px;}.calendar-detail-drawer .field label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-faint);}.drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}.drawer-actions{display:flex;gap:8px;margin-top:24px;}.drawer-actions .btn-primary{flex:1;justify-content:center;}.drawer-delete{display:none;}.drawer-delete.show{display:inline-flex;}.cal-undo-toast button{border:0;background:transparent;color:#bbaaff;font-weight:750;font-size:11px;margin-left:6px;padding:0;}
+.cal-undo-toast{animation:toastin .25s ease,toastout .3s ease 4.7s forwards}
+.cal-meeting-card{margin:4px 0 16px;padding:14px;border:1px solid rgba(150,126,255,.18);border-radius:14px;background:rgba(124,92,255,.045)}.cal-meeting-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.cal-meeting-head strong{display:block;font-size:12px;color:var(--text)}.cal-meeting-head span{display:block;margin-top:3px;font-size:10px;color:var(--text-faint)}.cal-meet-switch{position:relative;display:block;width:38px;height:22px;flex:none}.cal-meet-switch input{position:absolute;opacity:0}.cal-meet-switch span{display:block;width:100%;height:100%;border-radius:99px;background:rgba(255,255,255,.12);transition:.2s}.cal-meet-switch span::after{content:"";display:block;width:16px;height:16px;margin:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:.2s}.cal-meet-switch input:checked+span{background:#7960ef;box-shadow:0 0 16px rgba(124,92,255,.28)}.cal-meet-switch input:checked+span::after{transform:translateX(16px)}.cal-meet-switch input:focus-visible+span{outline:2px solid var(--primary-2);outline-offset:2px}#calMeetingFields{padding-top:14px}.cal-recent-guests{display:flex;flex-wrap:wrap;gap:6px}.cal-recent-guest{border:1px solid var(--border-lit);border-radius:99px;padding:5px 8px;background:var(--raise);color:var(--text-dim);font-size:9.5px}.cal-recent-guest:hover{border-color:var(--primary);color:var(--text)}.cal-guest-error{min-height:14px;margin-top:4px;color:var(--danger-soft);font-size:10px}.cal-meet-link{display:flex;align-items:center;justify-content:center;margin-top:12px;padding:9px 12px;border:1px solid rgba(133,111,244,.32);border-radius:10px;background:rgba(124,92,255,.1);color:#c7bbff;font-size:11px;font-weight:750;text-decoration:none}.cal-meet-link[hidden]{display:none}:root[data-theme="light"] .cal-meeting-card{background:#f6f2ff;border-color:#ddd2f3}:root[data-theme="light"] .cal-meet-switch span{background:#d8d4df}:root[data-theme="light"] .cal-meet-link{color:#5b409e;background:#eee7fb}
+.cal-share-card{margin:4px 0 16px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.cal-share-card[hidden]{display:none}.cal-share-copy strong{display:block;font-size:12px;color:var(--text)}.cal-share-copy span{display:block;margin:3px 0 11px;font-size:10px;color:var(--text-faint)}.cal-share-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.cal-share-actions .btn{justify-content:center;min-width:0}:root[data-theme="light"] .cal-share-card{background:#fff}
+.cloud-migration{margin:12px 0;padding:13px;border:1px solid rgba(140,116,255,.24);border-radius:12px;background:rgba(124,92,255,.055)}.cloud-migration[hidden]{display:none}.cloud-migration strong{font-size:12px}.cloud-migration p{margin:5px 0 10px;color:var(--text-faint);font-size:10.5px;line-height:1.45}.cloud-auth-actions{flex-wrap:wrap}#cloudDataEnable[hidden],#cloudDataNow[hidden],#cloudDataDisable[hidden],#cloudDataUseCloud[hidden],#pwaInstallSettings[hidden]{display:none!important}:root[data-theme="light"] .cloud-migration{background:#f5f1ff}
+/* Event geometry: preserve time-slot height and reserve a separate lane per collision. */
+.cal-time-canvas{--cal-gutter:30px;--cal-edge:5px;}
+.cal-event{right:auto;min-height:0;padding:5px 6px;box-shadow:0 2px 5px rgba(0,0,0,.08);}
+.cal-event:hover{transform:none;}
+.cal-event.compact{padding:2px 5px;display:flex;align-items:center;border-radius:5px;}
+.cal-event.compact .cal-event-title{font-size:9px;line-height:1.1;min-width:0;}
+.cal-event.concurrent .cal-event-meta{display:none;}
+.cal-event.concurrent{z-index:3;border-color:rgba(174,151,255,.42);box-shadow:0 3px 10px rgba(0,0,0,.16);}
+.cal-event.concurrent[data-cal-lane^="2/"]{background:linear-gradient(135deg,rgba(61,101,176,.35),rgba(37,54,99,.25));border-left-color:#719de9;}
+.cal-drag-time{display:none;}.cal-drag-time.show{display:block;}
+.cal-event,.backlog-task{touch-action:none;}
+.cal-drag-preview{position:fixed;z-index:1000;pointer-events:none;width:224px;max-width:calc(100vw - 16px);padding:12px 14px;border:1px solid #a38bea;border-left:3px solid #b49bff;border-radius:12px;background:#29203f;color:#faf7ff;box-shadow:0 14px 38px rgba(0,0,0,.36);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;opacity:1;}
+.cal-drag-preview-title{font-size:12px;font-weight:650;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cal-drag-preview-time{margin-top:6px;font-size:11px;color:#d1c1f4;}
+.cal-drag-preview.outside{border-style:dashed;}
+.cal-drop-preview{position:absolute;left:var(--cal-gutter);right:var(--cal-edge);pointer-events:none;z-index:7;border:1.5px dashed #b097ed;border-radius:7px;background:rgba(159,126,236,.18);}
+body.cal-dragging .cal-backlog-backdrop{pointer-events:none!important;opacity:0;}
+body.cal-dragging .cal-backlog{pointer-events:none!important;}
+:root[data-theme="light"] .cal-drag-preview{background:#f5efff;color:#30213f;border-color:#9679c8;box-shadow:0 14px 32px rgba(56,37,86,.22);}
+:root[data-theme="light"] .cal-drag-preview-time{color:#68498e;}
+:root[data-theme="light"] .cal-drop-preview{background:rgba(129,85,195,.12);border-color:#8455ba;}
+.cal-time{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-all-day{padding:4px 5px 4px 30px;overflow:auto;border-bottom:1px solid var(--hairline);}
+.cal-all-day-event{display:block;width:100%;height:25px;margin-bottom:4px;padding:3px 6px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--border-lit);border-radius:6px;background:var(--raise);color:var(--text);font-size:10px;}
+.cal-all-day-event:last-child{margin-bottom:0;}
+.cal-quick input{min-width:0;}
+.calendar-detail-drawer .drawer-grid>*{min-width:0;}
+.calendar-detail-drawer input{max-width:100%;min-width:0;}
+#calDeleteSeries[hidden],#calEventRepeat[hidden]{display:none;}
+.cal-event:focus-visible,.cal-all-day-event:focus-visible{outline:2px solid var(--primary);outline-offset:1px;}
+
+/* Light calendar: opaque pastel cards, ink text, and quiet neutral surfaces. */
+:root[data-theme="light"] .calendar-shell{background:#fcfcff;border-color:#dddde8;box-shadow:0 12px 40px rgba(43,35,74,.08);--hairline:#e4e4ed;}
+:root[data-theme="light"] .calendar-topbar{background:#fff;}
+:root[data-theme="light"] .cal-title,:root[data-theme="light"] .cal-event-title,:root[data-theme="light"] .victory-input:focus{color:#292637;}
+:root[data-theme="light"] .cal-eyebrow,:root[data-theme="light"] .calendar-detail-kicker,:root[data-theme="light"] .cal-quick-icon,:root[data-theme="light"] .cal-backlog-trigger::before,:root[data-theme="light"] .cal-drag-time{color:#6950b6;}
+:root[data-theme="light"] .cal-icon-btn,:root[data-theme="light"] .cal-today-btn{background:#fff;border-color:#dcdce7;color:#514c64;}
+:root[data-theme="light"] .cal-icon-btn:hover,:root[data-theme="light"] .cal-today-btn:hover{background:#efebfa;border-color:#b5a4de;color:#51378a;}
+:root[data-theme="light"] .cal-view-switch{background:#eeedf3;border-color:#e2e0e9;}
+:root[data-theme="light"] .cal-view-btn{color:#656074;}
+:root[data-theme="light"] .cal-view-btn.active{background:#fff;color:#503a89;box-shadow:0 1px 4px rgba(50,40,70,.12);}
+:root[data-theme="light"] .cal-add-btn{box-shadow:0 3px 9px rgba(97,69,183,.17);}
+:root[data-theme="light"] .cal-quick{background:#f7f6fb;}
+:root[data-theme="light"] .cal-quick input::placeholder{color:#706b80;opacity:1;}
+:root[data-theme="light"] .cal-quick:focus-within{box-shadow:inset 0 -2px #a18acb;}
+:root[data-theme="light"] .victories-card,:root[data-theme="light"] .capacity-card{background:#fff;border-color:#e2e1ea;}
+:root[data-theme="light"] .victory-num{color:#6445a5;background:#eee7fb;}
+:root[data-theme="light"] .capacity-meter{background:#eae7f0;}
+:root[data-theme="light"] .capacity-fill.warn{background:linear-gradient(90deg,#be8338,#ce6156);}
+:root[data-theme="light"] .cal-card-label,:root[data-theme="light"] .capacity-note,:root[data-theme="light"] .cal-check,:root[data-theme="light"] .cal-quick-hint{color:#686277;}
+:root[data-theme="light"] .cal-grid{background:#fff;}
+:root[data-theme="light"] .cal-day-head{background:#f8f8fc;color:#666074;}
+:root[data-theme="light"] .cal-day-head small{color:#71549f;}
+:root[data-theme="light"] .cal-day.today,:root[data-theme="light"] .cal-day.selected{background:#faf8ff;}
+:root[data-theme="light"] .cal-day.today .cal-day-head b{box-shadow:none;}
+:root[data-theme="light"] .cal-time-canvas{background:repeating-linear-gradient(to bottom,transparent 0,transparent 59px,#e7e5ee 60px);}
+:root[data-theme="light"] .cal-hour-label{color:#777184;}
+:root[data-theme="light"] .cal-event,:root[data-theme="light"] .overview-event{background:#eee8fb;border-color:#d7cbed;border-left-color:#8c6bb9;box-shadow:0 1px 3px rgba(47,37,70,.04);}
+:root[data-theme="light"] .cal-event:hover{filter:none;border-color:#9f88c4;box-shadow:0 2px 6px rgba(65,43,96,.13);}
+:root[data-theme="light"] .cal-event.protected{background:#fbefd3;border-color:#ebd9ab;border-left-color:#b08734;}
+:root[data-theme="light"] .cal-event.break-event{background:#e7f2ee;border-color:#c9ded4;border-left-color:#6b9d86;}
+:root[data-theme="light"] .cal-event.routine-styled,:root[data-theme="light"] .overview-event.routine-styled{background:#f4e9f3;border-color:#e3cde1;border-left-color:#ad76a5;}
+:root[data-theme="light"] .cal-event.routine-mediant,:root[data-theme="light"] .overview-event.routine-mediant{background:#e8effa;border-color:#cbd9ee;border-left-color:#7296c2;}
+:root[data-theme="light"] .cal-event.routine-learning,:root[data-theme="light"] .overview-event.routine-learning{background:#fbefdf;border-color:#ebd6b9;border-left-color:#bd925a;}
+:root[data-theme="light"] .cal-event.routine-career,:root[data-theme="light"] .overview-event.routine-career{background:#e5f1f2;border-color:#c7dfe1;border-left-color:#669ba2;}
+:root[data-theme="light"] .cal-event.routine-wellbeing,:root[data-theme="light"] .overview-event.routine-wellbeing{background:#eaf3e9;border-color:#cfe1cc;border-left-color:#7fa276;}
+:root[data-theme="light"] .cal-time,:root[data-theme="light"] .cal-event-meta{color:#625c71;}
+:root[data-theme="light"] .cal-rhythm-btn.active{color:#5d408f;background:#efe9fa;border-color:#cbbce3;}
+:root[data-theme="light"] .cal-date-pill.active b,:root[data-theme="light"] .cal-date-pill.today b{color:#6540a1;}
+:root[data-theme="light"] .cal-now-line{background:#c34e78;box-shadow:none;}
+:root[data-theme="light"] .cal-now-line::before{background:#c34e78;}
+:root[data-theme="light"] .cal-backlog{background:rgba(253,252,255,.98);border-color:#dcd3e9;box-shadow:0 16px 45px rgba(47,35,76,.16);}
+:root[data-theme="light"] .backlog-task{background:#fff;border-color:#e2dfeb;}
+:root[data-theme="light"] .backlog-task:hover{background:#f5f1fc;border-color:#b8a6d4;}
+:root[data-theme="light"] .backlog-count{background:#eeebf4;}
+:root[data-theme="light"] .backlog-schedule{background:#eae1f8;color:#5d3c94;}
+:root[data-theme="light"] .cal-backlog-backdrop,:root[data-theme="light"] .calendar-detail-backdrop{background:rgba(64,54,82,.16);}
+:root[data-theme="light"] .calendar-detail-drawer{background:#fdfcfe;border-color:#dcd5e7;box-shadow:-12px 0 40px rgba(47,35,76,.12);}
+:root[data-theme="light"] .calendar-detail-close{background:#efedf4;color:#625970;}
+:root[data-theme="light"] .cal-undo-toast button{color:#644099;}
+@media(max-width:720px){.cal-time-canvas{--cal-gutter:42px;--cal-edge:10px;}.cal-time-canvas .cal-event{padding:5px 6px;}.cal-time-canvas .cal-event.compact{padding:2px 6px;}.cal-event.compact .cal-event-title{font-size:10px;}.cal-filterbar{flex-wrap:wrap;}.cal-filter-row{flex-basis:100%;}.cal-date-strip{scrollbar-width:none;}}
+@media (max-width:1000px){.calendar-topbar{flex-wrap:wrap}.cal-heading{min-width:0;width:calc(100% - 170px)}.cal-view-switch{order:3}.cal-insights{grid-template-columns:1fr}}
+@media (max-width:720px){.app{padding:12px 10px 88px}.calendar-shell{border-radius:18px}.calendar-topbar{padding:14px;gap:9px}.cal-heading{order:-2;width:100%;margin-bottom:4px}.cal-title{font-size:22px}.cal-nav-group{order:-1}.cal-view-switch{display:none}.cal-add-btn{margin-left:auto}.cal-quick{padding:10px 14px}.cal-quick-hint{display:none}.cal-insights{padding:10px 14px}.capacity-card{display:none}.calendar-workspace{display:block;min-height:0}.cal-backlog{position:fixed;display:block;left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:min(72vh,620px);border-radius:22px;transform:translateY(calc(100% + 24px))}.calendar-workspace.backlog-open .cal-backlog{transform:none}.cal-backlog-backdrop{position:fixed;inset:0}.cal-filterbar{padding:7px 11px}.cal-filter-row{margin-left:0}.cal-filter-row .cal-check:nth-child(3){display:none}.cal-date-strip{display:flex}.cal-grid{--cal-days:1;display:block;overflow:visible}.cal-day{display:none;border:0}.cal-day.selected,.cal-day.mobile-active{display:block}.cal-day-head{display:none}.cal-day-body{height:calc(100vh - 380px);min-height:430px}.cal-event{left:42px;right:10px;padding:8px 10px;font-size:11px}.cal-hour-label{left:8px}.cal-now-line{left:35px}.calendar-detail-drawer{width:100%;top:auto;height:min(78vh,680px);border-left:0;border-top:1px solid rgba(161,137,255,.26);border-radius:22px 22px 0 0;transform:translateY(103%);}.calendar-detail-drawer.show{transform:none}.drawer-grid{grid-template-columns:1fr 1fr}.cal-overview-grid{display:block}.cal-overview-grid .cal-day.mobile-active{display:block;min-height:280px}.voice-dock{right:12px;bottom:12px}.nav{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.nav-btn{white-space:nowrap}.nav-nexus{margin-left:0}}
+
+@media (max-width:640px){
+  .hud{flex-wrap:wrap;}
+  .hud-stats{width:100%;justify-content:space-between;}
+  .timer-display{font-size:48px;}
+  .portal-stage{overflow-x:auto;}
+}
+</style>
+<link rel="stylesheet" href="achievements.css">
+<link rel="stylesheet" href="auth.css">
+</head>
+<body class="auth-pending">
+<section class="auth-screen" id="authScreen" aria-label="ARISE sign in">
+  <div class="auth-shell">
+    <div class="auth-story"><span class="auth-mark" aria-hidden="true">✦</span><span class="auth-brand">ARISE</span><p class="auth-story-line">Every chapter starts with a choice.</p><div class="auth-story-glow" aria-hidden="true"></div></div>
+    <div class="auth-card">
+      <div class="auth-eyebrow">YOUR ACCOUNT · YOUR PROGRESS</div>
+      <div id="authChecking"><h1>Preparing your journey</h1><p>Checking your ARISE session…</p></div>
+      <div id="authEntry" hidden>
+        <h1>Welcome to ARISE.</h1><p class="auth-intro">Sign in to open your private account. Turn on cloud sync in Settings to use your plans across devices.</p>
+        <button type="button" class="auth-google" id="cloudGoogleSignIn"><span class="auth-google-g" aria-hidden="true">G</span>Continue with Google</button>
+        <div class="auth-divider"><span>or sign in with email</span></div>
+        <form id="authEmailForm" novalidate>
+          <label for="cloudEmail">Email</label><input id="cloudEmail" type="email" autocomplete="username" inputmode="email" placeholder="you@example.com" required>
+          <label for="cloudPassword">Password</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Your password" required>
+          <button class="auth-submit" type="submit" id="cloudSignIn">Sign in with email</button>
+        </form>
+        <div class="auth-links"><button type="button" id="cloudCreate">Create account</button><button type="button" id="cloudResend">Resend confirmation</button></div>
+        <div class="auth-install"><button type="button" id="pwaInstall" hidden>Install ARISE</button><p id="pwaInstallHint" role="status" aria-live="polite"></p></div>
+      </div>
+      <div id="authOfflineActions" hidden><h1>Can’t reach your account.</h1><p class="auth-intro">Check your connection and try again. You can continue with this account’s private device copy while offline. Older unlinked desktop data stays preserved separately.</p><button class="auth-secondary" type="button" id="authRetry">Try again</button><button class="auth-link-button" type="button" id="authContinueOffline">Continue with this account’s device copy</button></div>
+      <p id="authStatus" class="auth-status" role="status" aria-live="polite"></p>
+      <p class="auth-footnote">Google or email signs you in. Cloud sync is optional in Settings; your device copy remains available.</p>
+    </div>
+  </div>
+</section>
+<div class="top-search-anchor"><button id="quickActionsOpen" class="top-search-trigger" aria-label="Search and quick actions" aria-controls="quickActions" aria-expanded="false" title="Search · ⌘K"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg></button></div>
+
+<div class="app">
+
+  <div class="app-toolbar"><details class="hunter-overview" id="hunterOverview"><summary><span class="brand-wordmark">ARISE</span><span class="hunter-compact-level"><span id="hunterCompactRank" class="hunter-compact-rank">E-Rank Hunter</span><span id="hunterCompactXP" class="hunter-compact-xp" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="hunterCompactXPFill"></span></span></span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary>
+  <div class="hud">
+    <div class="hud-avatar" id="hudAvatar">E</div>
+    <div class="hud-main">
+      <div class="hud-top">
+        <span class="hud-name">HUNTER</span>
+        <span class="hud-title" id="hudTitle">E-Rank Hunter</span>
+        <span class="hud-level" id="hudLevel">LV. 1</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+      <div class="xp-label" id="xpLabel">0 / 100 XP</div>
+    </div>
+    <div class="hud-stats">
+      <div class="hud-stat"><div class="n streak-fire" id="streakN">0🔥</div><div class="l">Streak</div></div>
+      <div class="hud-stat"><div class="n" id="clearedN">0</div><div class="l">Cleared</div></div>
+      <div class="hud-stat"><div class="n" id="armyN">0</div><div class="l">Wins</div></div>
+    </div>
+  </div>
+  </details><div class="toolbar-actions"><button class="theme-toggle" id="syncToggle" title="Settings" aria-label="Settings"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="18" r="2"/></svg></button><button class="theme-toggle" id="themeToggle" title="Switch theme" aria-label="Switch colour theme">☾</button></div></div>
+
+  <div class="nav" role="navigation" aria-label="Main navigation">
+    <button class="nav-btn" data-view="today"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m8 12 3 3 5-6"/></svg>Today</button>
+    <button class="nav-btn" data-view="tomorrow"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/><path d="M5 5v14"/></svg>Plan Tomorrow</button>
+    <button class="nav-btn active" data-view="quests" aria-current="page"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 3h9v10H3zM3 7V4h7l2 3h8v3"/></svg>Projects</button>
+    <button class="nav-btn" data-view="calendar"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16"/></svg>Calendar</button>
+    <button class="nav-btn" data-view="health"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>Health</button>
+    <details class="nav-more" id="navMore"><summary><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg><span id="navMoreLabel">More</span></summary><div class="nav-more-list">
+      <button class="nav-btn" data-view="all">All Tasks <span class="nav-badge nav-count" id="allBadge"></span></button>
+      <button class="nav-btn" data-view="daily">Daily Quests <span class="nav-badge" id="dailyBadge" style="display:none"></span></button>
+      <button class="nav-btn" data-view="focus">Focus</button>
+      <button class="nav-btn" data-view="reminders">Reminders</button>
+      <button class="nav-btn" data-view="bucket">Bucket List</button>
+      <button class="nav-btn" data-view="army">Achievements</button>
+    </div></details>
+    <button class="theme-toggle" id="handControlToggle" title="Start hand control" aria-label="Toggle camera hand control" aria-pressed="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6-8a1.5 1.5 0 0 1 3 0v8-6a1.5 1.5 0 0 1 3 0v7-3a1.5 1.5 0 0 1 3 0v6c0 4-2.5 7-6 7h-1c-2 0-3.5-1-5-3l-4-5a1.5 1.5 0 0 1 2-2z"/></svg></button>
+    <button class="nav-nexus" id="nexusPanelOpen" title="Open Nexus AI" aria-label="Open Nexus AI"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg></button>
+  </div>
+
+  <section id="goalsPanel" class="goals-panel" aria-label="Your short-term and long-term goals"></section>
+  <!-- QUEST LOG -->
+  <div class="view" id="view-today"><section id="todaySurface" aria-label="Today’s execution plan"></section></div>
+  <div class="view" id="view-tomorrow"><section id="tomorrowSurface" aria-label="Plan tomorrow"></section></div>
+  <div class="view active" id="view-quests">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Dungeons</div>
+        <div class="section-sub">Every dungeon opens off the portal. Select one to see its Gates, ranked by priority.</div>
+      </div>
+      <button class="btn btn-primary" id="btnAddDungeon">+ New Dungeon</button>
+    </div>
+    <div class="portal-stage" id="portalStage">
+      <svg class="portal-lines" id="portalLines"></svg>
+      <div class="portal-core" id="portalCore"><div class="portal-ring"></div><div class="portal-glyph">🌀</div></div>
+      <div id="portalNodes"></div>
+    </div>
+    <div id="dungeonDetail"></div>
+  </div>
+
+  <!-- ALL TASKS -->
+  <div class="view" id="view-all">
+    <div class="section-head">
+      <div>
+        <div class="section-title">All Tasks</div>
+        <div class="section-sub" id="allSummary">Every gate across every dungeon, highest priority first.</div>
+      </div>
+    </div>
+    <div class="all-toolbar">
+      <input id="allSearch" class="all-search" placeholder="Search gates and quests…">
+      <div class="chip-row" id="allStatusChips">
+        <button class="chip active" data-status="active">Active</button>
+        <button class="chip" data-status="done">Cleared</button>
+        <button class="chip" data-status="all">All</button>
+      </div>
+      <select id="allSort" class="all-sort">
+        <option value="priority">Sort: Priority</option>
+        <option value="due">Sort: Due date</option>
+        <option value="dungeon">Sort: Dungeon</option>
+        <option value="progress">Sort: Progress</option>
+      </select>
+      <select id="allDungeon" class="all-sort"></select>
+    </div>
+    <div id="allList"></div>
+  </div>
+
+  <!-- DAILY QUEST -->
+  <div class="view" id="view-daily">
+    <div id="dailyBanners"></div>
+    <div class="section-head">
+      <div>
+        <div class="section-title">Daily Quest</div>
+        <div class="section-sub">Complete every item before the day resets, or the System issues a penalty and your streak breaks.</div>
+      </div>
+    </div>
+    <div class="daily-card">
+      <div id="dailyList"></div>
+      <div class="add-daily-row">
+        <input id="dailyInput" placeholder="Add a recurring daily quest (e.g. Read 20 pages)">
+        <button class="btn btn-primary btn-sm" id="btnAddDaily">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOCUS / POMODORO -->
+  <div class="view" id="view-focus">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Focus Chamber</div>
+        <div class="section-sub">Work in timed sessions. Breaks come with a small Rest Quest so you're never fully idle.</div>
+      </div>
+    </div>
+    <div class="focus-wrap">
+      <section id="focusTaskContext" aria-label="Current focus task" style="grid-column:1/-1"></section>
+      <div class="timer-card">
+        <div class="timer-mode" id="timerMode">Focus Session</div>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="btnTimerToggle">Start</button>
+          <button class="btn" id="btnTimerReset">Reset</button>
+          <button class="btn btn-ghost" id="btnTimerSkip">Skip</button>
+        </div>
+        <div class="focus-stats">
+          <div class="hud-stat"><div class="n" id="focusSessionsN">0</div><div class="l">Sessions Today</div></div>
+          <div class="hud-stat"><div class="n" id="focusTotalN">0</div><div class="l">All Time</div></div>
+        </div>
+      </div>
+      <div class="rest-card">
+        <div class="section-title" style="font-size:12.5px;">Rest Quest</div>
+        <div class="section-sub">Shown automatically on your break. Optional, but it earns XP and keeps momentum.</div>
+        <div id="restQuestBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="view" id="view-health"><div id="healthSurface"></div><section id="healthRemindersHost" aria-label="Other reminders"><div id="remindersSurface"></div></section></div>
+  <div class="view" id="view-reminders"><div id="remindersPageHost"></div></div>
+
+  <!-- CALENDAR -->
+  <div class="view" id="view-calendar">
+    <section class="calendar-shell" aria-label="Weekly planner">
+      <header class="calendar-topbar">
+        <div class="cal-heading"><div class="cal-eyebrow">Weekly command center</div><div class="cal-title" id="calTitle"></div></div>
+        <div class="cal-nav-group"><button class="cal-icon-btn" id="calPrev" aria-label="Previous period">‹</button><button class="cal-today-btn" id="calToday">Today</button><button class="cal-icon-btn" id="calNext" aria-label="Next period">›</button></div>
+        <div class="cal-view-switch" id="calViewSwitch"><button class="cal-view-btn" data-cal-view="focus">Focus</button><button class="cal-view-btn active" data-cal-view="week">Week</button><button class="cal-view-btn" data-cal-view="overview">Overview</button></div>
+        <button class="cal-add-btn" id="planWeekOpen">✦ Plan my week</button><button class="cal-icon-btn" id="calSync" aria-label="Sync calendar" title="Sync calendar">↻</button><button class="cal-add-btn" id="calAdd">＋ Add</button>
+      </header>
+      <form class="cal-quick" id="calQuickForm"><span class="cal-quick-icon">✦</span><input id="calQuickInput" autocomplete="off" placeholder="Quick add — ‘Design review tomorrow at 2pm for 45m’"><span class="cal-quick-hint">Press Return to schedule</span><button class="cal-icon-btn" type="submit" aria-label="Schedule quick add" style="width:28px;height:28px;font-size:13px">↵</button></form>
+      <details class="cal-insights-disclosure"><summary>Weekly outcomes & capacity</summary><div class="cal-insights"><div class="victories-card"><div class="cal-card-label"><span>This week’s victories</span><span>3 outcomes</span></div><div id="calVictories"></div></div><div class="capacity-card"><div class="cal-card-label"><span>Capacity</span><button class="cal-icon-btn" id="calCapacityEdit" style="width:24px;height:24px;font-size:12px" aria-label="Edit weekly capacity">•••</button></div><div id="calCapacity"></div></div></div></details>
+      <div class="calendar-workspace" id="calendarWorkspace">
+        <div class="cal-backlog-backdrop" id="calBacklogBackdrop" aria-hidden="true"></div>
+        <aside class="cal-backlog" id="calBacklogPanel" aria-label="Task backlog" aria-hidden="true" inert><div class="backlog-head"><span class="backlog-title">Backlog</span><button class="cal-icon-btn" id="calBacklogToggle" aria-label="Close backlog">×</button></div><div class="backlog-content" id="calBacklog"></div></aside>
+        <div class="cal-main"><div class="cal-filterbar"><button class="cal-icon-btn cal-backlog-trigger" id="calBacklogOpen" aria-label="Open backlog" aria-expanded="false">Backlog</button><button class="cal-icon-btn" id="calProtect" aria-label="Protect daily goals" title="Protect daily goals" style="width:30px;height:30px;font-size:13px">◇</button><button class="cal-icon-btn cal-rhythm-btn" id="calRoutineToggle" aria-label="Toggle weekly creative rhythm">Rhythm on</button><div class="cal-drag-time" id="calDragTime">09:00</div><details class="cal-display-options"><summary>Display</summary><div class="cal-filter-row"><label class="cal-check"><input id="calShowCompleted" type="checkbox"> Completed</label><label class="cal-check"><input id="calShowBreaks" type="checkbox" checked> Breaks</label><label class="cal-check"><input id="calShowWeekends" type="checkbox" checked> Weekends</label></div></details></div><div class="cal-date-strip" id="calDateStrip"></div><div class="cal-grid" id="calGrid"></div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- SHADOW ARMY -->
+  <div class="view" id="view-bucket"><section id="bucketBoard" class="bucket-board" aria-label="Bucket List vision board"></section></div>
+  <div class="view" id="view-army">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Shadow Army</div>
+        <div class="section-sub" id="armySummary">A home for the things you made happen.</div>
+      </div>
+    </div>
+    <div class="army-grid" id="armyGrid"></div>
+  </div>
+
+</div>
+
+<div class="calendar-detail-backdrop" id="calendarDetailBackdrop"></div>
+<aside class="calendar-detail-drawer" id="calendarDetailDrawer" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Calendar item details" inert>
+  <div class="calendar-detail-head"><div><div class="calendar-detail-kicker" id="calDrawerKicker">New item</div><h3 id="calDrawerHeading">Schedule time</h3></div><button class="calendar-detail-close" id="calDrawerClose" aria-label="Close details">×</button></div>
+  <div class="field"><label for="calEventTitle">Title</label><input id="calEventTitle" placeholder="What are you making progress on?"></div><div class="field"><label for="calEventDate">Date</label><input id="calEventDate" type="date"></div>
+  <div class="drawer-grid"><div class="field"><label for="calEventStart">Starts</label><input id="calEventStart" type="time" value="09:00"></div><div class="field"><label for="calEventEnd">Ends</label><input id="calEventEnd" type="time" value="10:00"></div></div>
+  <div class="field"><label for="calEventReminder">Reminder</label><select id="calEventReminder"><option value="5">5 minutes before</option><option value="15" selected>15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option></select></div>
+  <div class="field"><label for="calEventRepeat">Repeat</label><select id="calEventRepeat" aria-describedby="calRepeatHint"><option value="none">Does not repeat</option><option value="daily">Every day</option></select><div id="calRepeatHint" class="sync-hint">Every day repeats at this time, starting on the selected date.</div></div>
+  <section class="cal-meeting-card" aria-labelledby="calMeetingTitle">
+    <div class="cal-meeting-head"><div><strong id="calMeetingTitle">Google meeting</strong><span>Create a Meet link and invite guests.</span></div><label class="cal-meet-switch"><input id="calEventMeet" type="checkbox"><span aria-hidden="true"></span></label></div>
+    <div id="calMeetingFields" hidden>
+      <div class="field"><label for="calEventGuests">Guest emails</label><input id="calEventGuests" type="text" inputmode="email" autocomplete="off" placeholder="name@example.com, teammate@example.com" aria-describedby="calGuestHint calGuestError"><div id="calGuestError" class="cal-guest-error" role="alert"></div><div id="calGuestHint" class="sync-hint">Separate multiple addresses with commas. Guests receive a Google Calendar invitation.</div></div>
+      <div id="calRecentGuests" class="cal-recent-guests" aria-label="Recently used guest emails"></div>
+      <a id="calMeetLink" class="cal-meet-link" href="#" target="_blank" rel="noreferrer" hidden>◈ Join Google Meet</a>
+    </div>
+  </section>
+  <section class="cal-share-card" id="calShareCard" hidden aria-labelledby="calShareTitle">
+    <div class="cal-share-copy"><strong id="calShareTitle">Share event</strong><span>Send the details without needing their email.</span></div>
+    <div class="cal-share-actions"><button type="button" class="btn btn-sm" id="calShareCopy">Copy invite</button><button type="button" class="btn btn-sm" id="calShareGoogle">Add to Google Calendar</button></div>
+    <div class="sync-hint">The Google Calendar button lets them save their own copy. It does not add them as an official guest.</div>
+  </section>
+  <button class="btn btn-sm" id="calDeleteSeries" hidden>Delete daily series</button>
+  <input type="hidden" id="calEventGate"><input type="hidden" id="calEventId"><input type="hidden" id="calEventSource">
+  <div class="drawer-actions"><button class="btn btn-danger drawer-delete" id="calEventDelete">Delete</button><button class="btn btn-primary" id="calEventSave">Save item</button></div>
+</aside>
+
+<!-- Nexus AI side panel -->
+<div class="nexus-drawer-backdrop" id="nexusDrawerBackdrop"></div>
+<aside class="nexus-drawer" id="nexusDrawer" aria-hidden="true">
+  <div class="nexus-drawer-head">
+    <div>
+      <div class="section-title">Nexus Strategist</div>
+      <div class="section-sub">Live guidance from your complete quest log.</div>
+    </div>
+    <button class="nexus-drawer-close" id="nexusPanelClose" title="Close">✕</button>
+  </div>
+  <div class="nexus-card">
+    <div class="nexus-orb">✦</div>
+    <div class="section-title" style="font-size:17px;">What should we conquer next?</div>
+    <div class="section-sub">Nothing changes unless you choose to update a task yourself.</div>
+    <div class="nexus-actions">
+      <button class="btn btn-primary" id="aiPlanDay">Plan my day</button>
+      <button class="btn" id="aiQuickWin">Find a quick win</button>
+      <button class="btn" id="aiUnblock">Help me get unstuck</button>
+    </div>
+    <div class="nexus-question">
+      <input id="aiQuestion" placeholder="Ask Nexus about your tasks…">
+      <button class="btn btn-primary" id="aiAsk">Ask</button>
+    </div>
+    <div id="aiAnswer" class="nexus-answer" style="margin-top:16px;">Connect OpenAI in Settings, then ask Nexus to analyze your workload.</div>
+  </div>
+</aside>
+
+<!-- Voice Assistant -->
+<div class="voice-dock">
+  <div class="cheat-sheet" id="cheatSheet">
+    <div class="cheat-head">
+      <span>Voice commands</span>
+      <button class="cheat-close" id="cheatClose">✕</button>
+    </div>
+    <div class="cheat-hint">Leave out any detail and Nexus will ask you for it. Say <b>cancel</b> any time.</div>
+    <ul>
+      <li><b>Wake:</b> "Hey Nexus" / "Nexus"</li>
+      <li>"Create a dungeon called Launch the App"</li>
+      <li>"Add a gate" <i>— it'll ask the rest</i></li>
+      <li>"Add a gate called Design the flow, urgency 5, impact 4, effort 2, due tomorrow"</li>
+      <li>"Add a quest called Wireframe it to the Design the flow gate"</li>
+      <li>"Add a daily quest to read 20 pages"</li>
+      <li>"Delete gate called Design the flow" <i>— asks to confirm</i></li>
+      <li>"Mark Design the flow as done"</li>
+      <li><b>"Undo that"</b> / "actually delete that" <i>— or ⌘Z</i></li>
+      <li>"This one" <i>— when asked which dungeon/gate</i></li>
+      <li>"Show me all tasks" <i>— everything, everywhere</i></li>
+      <li>"What's next" / "How am I doing"</li>
+      <li>"Show me the shadow army" / "Start a focus session"</li>
+    </ul>
+  </div>
+  <div class="voice-panel" id="voicePanel"></div>
+  <button class="wake-toggle" id="wakeToggle" title="Always listen for &quot;Hey Nexus&quot;">🎧 Wake Word: Off</button>
+  <div class="voice-row">
+    <button class="cheat-toggle" id="cheatToggle" title="Voice command list">?</button>
+    <button class="voice-fab" id="voiceBtn" title="Talk to the System">🎙️</button>
+  </div>
+</div>
+
+<!-- Confirm dialog (webview confirm() is a no-op in the desktop shell) -->
+<div class="overlay" id="modalConfirm">
+  <div class="modal" style="max-width:400px;">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <div class="sub" id="confirmBody"></div>
+    <div class="modal-actions">
+      <button class="btn" id="confirmNo">Cancel</button>
+      <button class="btn btn-danger" id="confirmYes">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Trello Sync Modal -->
+<div class="overlay" id="modalSync">
+  <div class="modal sync-modal">
+    <h3>Settings</h3>
+    <section id="notificationSettings" class="notification-settings"></section>
+    <div class="effects-settings">
+      <label for="effectsMode">System effects</label>
+      <select id="effectsMode" aria-describedby="effectsStatus"><option value="minimal">Minimal</option><option value="system">System</option><option value="cinematic">Cinematic</option></select>
+      <p id="effectsStatus" role="status">Subtle energy effects for meaningful actions.</p>
+    </div>
+
+    <div class="data-head">Voice assistant</div>
+    <label class="board-row"><input type="checkbox" id="setVoiceEnabled" checked>
+      <span>Enable voice assistant <span class="sync-sub">— mic button and wake word</span></span></label>
+    <div id="voiceSubSettings">
+      <label class="board-row"><input type="checkbox" id="setWakeWord">
+        <span>Listen for "Hey Nexus" <span class="sync-sub">— hands-free</span></span></label>
+      <label class="board-row"><input type="checkbox" id="setShowTranscripts" checked>
+        <span>Show what it hears <span class="sync-sub">— on-screen transcript bubbles</span></span></label>
+      <div class="voice-settings">
+        <label for="voiceSelect">Nexus voice</label>
+        <select id="voiceSelect"></select>
+        <div class="rate-row">
+          <span>Speed</span>
+          <input type="range" id="voiceRate" min="0.7" max="1.4" step="0.1" value="1">
+          <span id="voiceRateVal">1.0x</span>
+          <button class="btn btn-sm" id="voiceTest">Test</button>
+        </div>
+        <div class="voice-tip">For better quality, download an <b>Enhanced</b> or <b>Premium</b> voice in System Settings › Accessibility › Spoken Content › System Voice › Manage Voices.</div>
+      </div>
+    </div>
+
+    <div class="data-head" style="margin-top:18px;">Appearance</div>
+    <label class="board-row"><input type="checkbox" id="setLightMode">
+      <span>Light mode</span></label>
+
+    <div class="data-head" style="margin-top:18px;">Nexus AI</div>
+    <div class="sub">Lets Nexus analyze your ARISE tasks and recommend practical next actions. Your key is stored in macOS Keychain.</div>
+    <div class="field">
+      <label>OpenAI API key</label>
+      <input id="openaiKey" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn btn-primary btn-sm" id="aiConnect">Save &amp; test</button>
+    <button class="btn btn-sm btn-danger" id="aiDisconnect" style="margin-left:6px;">Disconnect</button>
+    <div id="aiStatus" class="ai-status">Checking connection…</div>
+
+    <div class="data-head" style="margin-top:18px;">Trello</div>
+    <div class="sub">Pulls your cards in as gates. One-way and read-only — ARISE can't change anything on your boards.</div>
+
+    <div class="field">
+      <label>1. API key <a href="#" id="trelloKeyLink" class="sync-link">get it here →</a></label>
+      <input id="trelloKey" placeholder="Paste your Trello API key" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label>2. Token <a href="#" id="trelloTokenLink" class="sync-link">generate one →</a></label>
+      <input id="trelloToken" placeholder="Paste the token Trello shows you" autocomplete="off" spellcheck="false">
+      <div class="sync-hint">The link asks for <b>read-only</b> access. Approve it, then copy the token from the page.</div>
+    </div>
+
+    <label class="board-row" style="margin:2px 0 2px;">
+      <input type="checkbox" id="trelloOnlyMine" checked>
+      <span>Only import cards assigned to me</span>
+    </label>
+    <label class="board-row" style="margin:0 0 10px;">
+      <input type="checkbox" id="trelloAutoSync" checked>
+      <span>Keep in sync automatically <span class="sync-sub">— on launch + every 15 min</span></span>
+    </label>
+    <div class="sync-hint" id="trelloWho" style="margin:-6px 0 10px;"></div>
+
+    <button class="btn btn-primary btn-sm" id="trelloConnect">Connect &amp; list boards</button>
+    <button class="btn btn-sm" id="trelloResync" style="display:none;margin-left:6px;">Sync now</button>
+
+    <div id="syncStatus" class="sync-status"></div>
+    <div id="trelloBoards" class="board-list"></div>
+
+    <div class="sync-foot">
+      <span id="trelloLast">Not synced yet.</span>
+      <button class="btn btn-sm btn-danger" id="trelloDisconnect">Disconnect</button>
+    </div>
+    <div class="sync-warn">Your key and token are saved on this Mac in the app's local storage, unencrypted. You can revoke access any time from Trello's account settings.</div>
+
+    <div class="data-head" style="margin-top:18px;">Google Calendar</div>
+    <div class="sub">Use the OAuth credentials from your Google Cloud Desktop app. Tokens are stored securely in macOS Keychain.</div>
+    <div class="field"><label>OAuth client ID</label><input id="googleClientId" placeholder="…apps.googleusercontent.com" autocomplete="off" spellcheck="false"></div>
+    <div class="field"><label>OAuth client secret</label><input id="googleClientSecret" type="password" placeholder="Google client secret" autocomplete="off" spellcheck="false"></div>
+    <button class="btn btn-primary btn-sm" id="googleConnect">Connect Google</button><button class="btn btn-sm btn-danger" id="googleDisconnect" style="margin-left:6px">Disconnect</button>
+    <div id="googleStatus" class="ai-status">Checking connection…</div>
+
+    <div class="data-head" style="margin-top:18px;">ARISE account</div>
+    <div class="sub">Cloud sync is optional and private to this signed-in account. Projects, tasks, local calendar plans, goals, progress and health reminders can sync through Supabase. API keys, passwords, Google Calendar connections and device settings stay on each device.</div>
+    <div class="data-row cloud-auth-actions"><button class="btn btn-sm btn-danger" id="cloudSignOut">Sign out</button></div>
+    <div id="cloudStatus" class="ai-status">Not signed in.</div>
+    <div class="data-row cloud-auth-actions">
+      <button class="btn btn-primary btn-sm" id="cloudDataEnable" hidden>Turn on cloud sync</button>
+      <button class="btn btn-sm" id="cloudDataNow" hidden>Sync now</button>
+      <button class="btn btn-sm" id="cloudDataDisable" hidden>Turn off cloud sync</button>
+    </div>
+    <div id="cloudDataStatus" class="ai-status" role="status" aria-live="polite">Cloud sync is off.</div>
+    <div class="data-row cloud-auth-actions"><button class="btn btn-sm" type="button" id="pwaInstallSettings" hidden>Install ARISE</button></div>
+    <p id="pwaInstallSettingsHint" class="sync-hint" role="status" aria-live="polite"></p>
+    <div id="cloudDataConflict" class="cloud-migration" hidden>
+      <strong>Choose which copy to keep</strong><p id="cloudDataConflictText"></p>
+      <div class="data-row cloud-auth-actions"><button class="btn btn-sm" id="cloudDataUseDevice">Use this device</button><button class="btn btn-sm" id="cloudDataUseCloud">Use Supabase</button></div>
+    </div>
+
+    <div class="data-head" style="margin-top:18px;">Your data</div>
+    <div class="sync-hint">ARISE keeps a device copy even when cloud sync is on. Save a backup regularly; achievement photos are still device-only.</div>
+    <div class="data-row">
+      <button class="btn btn-sm" id="btnExportBackup">Save a backup now</button>
+      <button class="btn btn-sm" id="btnRevealBackups">Show in Finder</button>
+    </div>
+    <div class="data-row">
+      <select id="backupPick" class="all-sort" style="flex:1;min-width:150px;"></select>
+      <button class="btn btn-sm" id="btnImportBackup">Restore</button>
+    </div>
+    <div id="dataStatus" class="sync-status"></div>
+    <div id="backupInfo" class="sync-hint"></div>
+
+    <div class="modal-actions"><button class="btn" data-close>Close</button></div>
+  </div>
+</div>
+
+<!-- Add Dungeon Modal -->
+<div class="overlay" id="modalDungeon">
+  <div class="modal">
+    <h3>New Dungeon</h3>
+    <div class="sub">A dungeon is a major project or area of your life.</div>
+    <div class="field"><label>Name</label><input id="dungeonName" placeholder="e.g. Launch the App"></div>
+    <div class="field"><label>Icon</label>
+      <select id="dungeonEmoji">
+        <option value="🗡️">🗡️ Blade</option>
+        <option value="🏰">🏰 Castle</option>
+        <option value="💼">💼 Work</option>
+        <option value="💪">💪 Fitness</option>
+        <option value="📚">📚 Study</option>
+        <option value="💰">💰 Money</option>
+        <option value="🎨">🎨 Creative</option>
+        <option value="🧠">🧠 Mind</option>
+        <option value="🏠">🏠 Home</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn btn-primary" id="btnSaveDungeon">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Gate Modal -->
+<div class="overlay task-editor-overlay" id="modalGate" aria-hidden="true" inert>
+  <div class="modal task-editor" role="dialog" aria-modal="true" aria-labelledby="gateModalTitle" aria-describedby="gateEditorHint" tabindex="-1">
+    <h3 id="gateModalTitle">New Gate</h3>
+    <div class="sub" id="gateEditorHint">Give the task a clear outcome. Set a deadline and adjust priority when needed.</div>
+    <div class="field"><label for="gateTitle">Title</label><input id="gateTitle" maxlength="180" required placeholder="e.g. Design the onboarding flow"></div>
+    <details class="editor-priority" id="gatePriorityDetails"><summary>Priority settings</summary>
+    <div class="slider-3">
+      <div class="field" style="margin-bottom:0"><label for="gUrgency">Urgency <span id="gUrgencyVal">3</span>/5</label>
+        <div class="slider-row"><input type="range" min="1" max="5" value="3" id="gUrgency"></div></div>
+      <div class="field" style="margin-bottom:0"><label for="gImpact">Impact <span id="gImpactVal">3</span>/5</label>
+        <div class="slider-row"><input type="range" min="1" max="5" value="3" id="gImpact"></div></div>
+      <div class="field" style="margin-bottom:0"><label for="gEffort">Effort <span id="gEffortVal">3</span>/5</label>
+        <div class="slider-row"><input type="range" min="1" max="5" value="3" id="gEffort"></div></div>
+    </div>
+    </details>
+    <div class="field"><label for="gateDue">Due date (optional)</label><input type="date" id="gateDue"></div>
+    <div class="score-preview">
+      <span>Priority Score: <b id="gateScoreVal">3.0</b></span>
+      <span class="rank-badge" id="gateRankBadge" style="width:30px;height:30px;">C</span>
+    </div>
+    <p id="gateEditorStatus" class="editor-status" role="status" aria-live="polite"></p>
+    <div class="modal-actions">
+      <button class="btn" data-close data-discard-gate>Cancel</button>
+      <button class="btn btn-primary" id="btnSaveGate">Add Gate</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-box">
+    <div class="arise">ARISE</div>
+    <div class="lvl" id="levelupLvl">LV. 2</div>
+    <div class="title" id="levelupTitle">D-Rank Hunter</div>
+    <div style="margin-top:22px;"><button class="btn btn-primary" id="btnLevelupClose">Continue</button></div>
+  </div>
+</div>
+
+<div id="winOverlay" class="win-overlay" hidden>
+  <section class="win-dialog" role="dialog" aria-modal="true" aria-labelledby="winTitle" aria-describedby="winMemoryHeading">
+    <button id="winClose" class="win-close" aria-label="Close achievement">×</button>
+    <div class="win-emblem" aria-hidden="true">✦</div><div id="winKicker" class="win-kicker">Achievement unlocked</div>
+    <h2 id="winTitle"></h2><div id="winDate" class="win-date"></div>
+    <p id="winMemoryHeading" class="win-memory-heading">Celebrate your wins with memories</p>
+    <button id="winAddPhotos" class="btn btn-primary">＋ Add photos</button>
+    <input id="winPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+    <div id="winPhotoCount" class="win-photo-count-hint"></div><div id="winPhotos" class="win-photos"></div>
+    <p id="winStatus" class="win-status" role="status" aria-live="polite"></p>
+    <button id="winDone" class="btn win-done">Done · Keep going</button>
+    <div id="winManage" class="win-manage"><button id="winReopen" class="btn btn-sm">Mark as not achieved</button><button id="winDelete" class="btn btn-sm btn-danger">Delete entry…</button></div>
+    <div id="winActionConfirm" class="win-action-confirm" hidden><p id="winActionText"></p><div><button id="winActionCancel" class="btn btn-sm">Cancel</button><button id="winActionApply" class="btn btn-sm btn-danger">Confirm</button></div></div>
+  </section>
+</div>
+<div id="winConfetti" class="win-confetti" aria-hidden="true"></div>
+<script src="achievements.js"></script>
+<script src="bucket-list.js"></script>
+<link rel="stylesheet" href="weekly-planner.css">
+<script src="weekly-planner-engine.js"></script>
+<script src="weekly-planner.js"></script>
+<link rel="stylesheet" href="today.css">
+<script src="today.js"></script>
+<link rel="stylesheet" href="tomorrow.css">
+<script src="tomorrow.js"></script>
+<link rel="stylesheet" href="quick-actions.css">
+<script src="quick-actions.js"></script>
+<link rel="stylesheet" href="ui-polish.css">
+<link rel="stylesheet" href="system-motion.css">
+<link rel="stylesheet" href="system-events.css">
+<script src="system-motion.js"></script>
+<link rel="stylesheet" href="health.css">
+<script src="health.js"></script>
+<script src="notifications.js"></script>
+<script src="custom-reminders.js"></script>
+<script src="widget-snapshot.js"></script>
+<link rel="stylesheet" href="hand-control.css">
+<script src="hand-gestures.js"></script>
+<script src="hand-control.js"></script>
+<script src="cloud-config.js"></script>
+<script src="cloud-sync.js"></script>
+<script src="cloud-data.js"></script>
+<script src="app.js"></script>
+<script src="pwa.js"></script>
+</body>
+</html>
