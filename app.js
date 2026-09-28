@@ -893,15 +893,44 @@ function scrollCalendarToNow(){
   const now=new Date(),minutes=now.getHours()*60+now.getMinutes(),top=Math.max(0,Math.min(1080,minutes-390));
   document.querySelectorAll(".cal-day-body").forEach(body=>{body.scrollTop=top});
 }
-function googleStatusMsg(text,kind){const e=document.getElementById("googleStatus");if(e){e.textContent=text;e.className="ai-status "+(kind||"")}updateConnectionsCount();}
-async function refreshGoogleStatus(){if(!isDesktop()){googleStatusMsg("Available in the Mac app for now.","");return false}try{const ok=await tauriInvoke("google_status");googleStatusMsg(ok?"Google Calendar connected.":"Not connected.",ok?"ok":"");return ok}catch(e){googleStatusMsg("Couldn't check Google connection.","err");return false}}
+function googleStatusMsg(text,kind){const e=document.getElementById("googleStatus");if(e){e.textContent=text;e.className="ai-status "+(kind||"")}document.getElementById("googleCard")?.classList.toggle("is-connected",kind==="ok");updateConnectionsCount();}
+/* Google Calendar runs through the Mac app's Rust commands on desktop and
+   through google-web.js (Google's sign-in popup, in-memory token) on the web. */
+let googleWeb=null;
+function googleWebClient(){
+  if(googleWeb||isDesktop())return googleWeb;
+  const clientId=window.ARISEIntegrationConfig?.googleWebClientId||"";
+  if(clientId&&window.ARISEGoogleWeb){googleWeb=window.ARISEGoogleWeb.create({clientId,account:()=>activeDataUserId});googleWeb.preload()}
+  return googleWeb;
+}
+async function googleConnected(){
+  if(isDesktop())return !!(await tauriInvoke("google_status"));
+  const g=googleWebClient();return !!(g&&g.linked());
+}
+function googleCall(cmd,args,interactive=true){
+  if(isDesktop())return tauriInvoke(cmd,args);
+  const g=googleWebClient();
+  if(!g)return Promise.reject(Error("Google Calendar isn't available on the web yet."));
+  if(cmd==="google_list_events")return g.listEvents(args,interactive);
+  if(cmd==="google_create_event")return g.createEvent(args,interactive);
+  if(cmd==="google_update_event")return g.updateEvent(args,interactive);
+  return Promise.reject(Error("Unsupported Google Calendar action."));
+}
+function renderGoogleWebCard(){
+  const box=document.getElementById("googleWebConnect"),g=googleWebClient();
+  if(!box)return;box.style.display=g?"":"none";if(!g)return;
+  const linked=g.linked();
+  for(const [id,show] of [["googleConnectWeb",!linked],["googleSyncWeb",linked],["googleDisconnectWeb",linked],["googleWebHint",!linked]]){const el=document.getElementById(id);if(el)el.style.display=show?"":"none"}
+}
+async function refreshGoogleStatus(){if(!isDesktop()){const g=googleWebClient();const on=!!(g&&g.linked());googleStatusMsg(!g?"Available in the Mac app for now.":on?"Connected":"Not connected",on?"ok":"");renderGoogleWebCard();return on}try{const ok=await tauriInvoke("google_status");googleStatusMsg(ok?"Google Calendar connected.":"Not connected.",ok?"ok":"");return ok}catch(e){googleStatusMsg("Couldn't check Google connection.","err");return false}}
 async function syncGoogleCalendar(silent){
+  const g=!silent&&googleWebClient();if(g&&g.linked()&&!g.hasToken())g.connect().catch(()=>{}); // open Google's popup while the tap still counts
   if(!await refreshGoogleStatus()){if(!silent)toast("Connect Google Calendar in Settings","danger");return}
-  const {start,end}=calRange(); try{const data=await tauriInvoke("google_list_events",{timeMin:start.toISOString(),timeMax:end.toISOString()});state.calendar.events=data.items||[];state.calendar.lastSync=Date.now();
+  const {start,end}=calRange(); try{const data=await googleCall("google_list_events",{timeMin:start.toISOString(),timeMax:end.toISOString()},!silent);state.calendar.events=data.items||[];state.calendar.lastSync=Date.now();
     rememberGuestEmails(state.calendar.events.flatMap(event=>(event.attendees||[]).map(attendee=>attendee.email).filter(Boolean)));
     const live=new Set(state.calendar.events.concat(state.calendar.localEvents||[]).map(e=>e.id));state.projects.forEach(p=>p.tasks.forEach(g=>{if(g.calendarEventId&&!live.has(g.calendarEventId))g.calendarEventId=null}));
     const today=new Date();if(state.calendar.protectDaily&&today>=start&&today<end)await ensureProtectedGoals();save();renderCalendar();if(calendarAutoScrollPending){scrollCalendarToNow();calendarAutoScrollPending=false}if(!silent)toast("Google Calendar synced","xp");
-  }catch(e){if(!silent)toast("Calendar sync failed: "+((e&&e.message)||String(e)),"danger")}
+  }catch(e){if(e&&e.code==="reauth"){googleStatusMsg("Connected · tap Sync now to refresh","ok");if(!silent)toast(e.message,"gold");return}if(!silent)toast("Calendar sync failed: "+((e&&e.message)||String(e)),"danger")}
 }
 function validGuestEmail(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
 function parseGuestEmails(value){return [...new Set(String(value||"").split(/[;,\n]+/).map(v=>v.trim().toLowerCase()).filter(Boolean))]}
@@ -928,11 +957,11 @@ async function createGoogleEvent(title,date,start,end,description,reminder,repea
   const guests=meeting.guests||[];
   if(guests.length)event.attendees=guests.map(email=>({email}));
   if(meeting.addMeet)event.conferenceData={createRequest:{requestId:uid("meet"),conferenceSolutionKey:{type:"hangoutsMeet"}}};
-  const made=await tauriInvoke("google_create_event",{event});state.calendar.events.push(made);
+  const made=await googleCall("google_create_event",{event});state.calendar.events.push(made);
   if(repeat==="daily"){
     // Fetch expanded instances instead of drawing both the master and its occurrences.
     const {start:rangeStart,end:rangeEnd}=calRange();
-    try{const data=await tauriInvoke("google_list_events",{timeMin:rangeStart.toISOString(),timeMax:rangeEnd.toISOString()});state.calendar.events=data.items||[];state.calendar.lastSync=Date.now();}
+    try{const data=await googleCall("google_list_events",{timeMin:rangeStart.toISOString(),timeMax:rangeEnd.toISOString()});state.calendar.events=data.items||[];state.calendar.lastSync=Date.now();}
     catch(_){toast("Daily series saved. Sync Calendar to load every occurrence.","gold");}
   }
   return made;
@@ -943,7 +972,7 @@ function createLocalCalendarEvent(title,date,start,end,description,reminder,repe
 async function createCalendarEvent(title,date,start,end,description,reminder,repeat="none",meeting={}){
   // An unconnected desktop calendar is still a fully usable local planner.
   // Once connected, surface Google write errors instead of silently duplicating locally.
-  const connected=isDesktop()&&await tauriInvoke("google_status");
+  const connected=await googleConnected();
   if((meeting.addMeet||meeting.guests?.length)&&!connected)throw new Error("Connect Google Calendar to add a Meet link or invite guests.");
   return connected?createGoogleEvent(title,date,start,end,description,reminder,repeat,meeting):createLocalCalendarEvent(title,date,start,end,description,reminder,repeat,meeting);
 }
@@ -969,7 +998,7 @@ async function moveCalendarItem(date,time,drag=calendarDrag){
   if(!drag)return;
   if(drag.type==="event"){
     const e=allCalendarEvents().find(x=>x.id===drag.id);if(!e)return;const oldPayload=JSON.parse(JSON.stringify(editableEventPayload(e))),old=calEventStart(e),oldEnd=calEventEnd(e),duration=Math.max(15*60000,oldEnd-old),next=new Date(`${date}T${time}:00`),nextEnd=new Date(next.getTime()+duration);e.start={dateTime:next.toISOString()};e.end={dateTime:nextEnd.toISOString()};
-    try{if(e._seriesId){const undo=updateLocalOccurrence(e,editableEventPayload(e));save();renderCalendar();toastCalendarUndo(`Moved to ${time}`,undo);return}if(e._routine){const item=findRoutine(e._routineKey),before=JSON.parse(JSON.stringify(item)),endTime=`${String(nextEnd.getHours()).padStart(2,"0")}:${String(nextEnd.getMinutes()).padStart(2,"0")}`;updateRoutine(item,item.title,date,time,endTime);save();renderCalendar();toastCalendarUndo(`Routine moved to ${time}`,async()=>Object.assign(item,before));return}if(!e._local){const updated=await tauriInvoke("google_update_event",{eventId:e.id,event:editableEventPayload(e)});Object.assign(e,updated)}save();renderCalendar();toastCalendarUndo(`Moved to ${time}`,async()=>{if(!e._local){const updated=await tauriInvoke("google_update_event",{eventId:e.id,event:oldPayload});Object.assign(e,updated)}else Object.assign(e,oldPayload)})}catch(err){Object.assign(e,oldPayload);toast("Move failed: "+((err&&err.message)||String(err)),"danger");renderCalendar()}
+    try{if(e._seriesId){const undo=updateLocalOccurrence(e,editableEventPayload(e));save();renderCalendar();toastCalendarUndo(`Moved to ${time}`,undo);return}if(e._routine){const item=findRoutine(e._routineKey),before=JSON.parse(JSON.stringify(item)),endTime=`${String(nextEnd.getHours()).padStart(2,"0")}:${String(nextEnd.getMinutes()).padStart(2,"0")}`;updateRoutine(item,item.title,date,time,endTime);save();renderCalendar();toastCalendarUndo(`Routine moved to ${time}`,async()=>Object.assign(item,before));return}if(!e._local){const updated=await googleCall("google_update_event",{eventId:e.id,event:editableEventPayload(e)});Object.assign(e,updated)}save();renderCalendar();toastCalendarUndo(`Moved to ${time}`,async()=>{if(!e._local){const updated=await googleCall("google_update_event",{eventId:e.id,event:oldPayload});Object.assign(e,updated)}else Object.assign(e,oldPayload)})}catch(err){Object.assign(e,oldPayload);toast("Move failed: "+((err&&err.message)||String(err)),"danger");renderCalendar()}
   }else if(drag.type==="gate"){
     const p=findProject(drag.pid),g=p&&findGate(p,drag.gid);if(!g)return;const [hh,mm]=time.split(":").map(Number),endM=hh*60+mm+60,end=`${String(Math.floor(endM/60)).padStart(2,"0")}:${String(endM%60).padStart(2,"0")}`;
     try{pushUndo("scheduling that gate");const made=await createCalendarEvent(g.title,date,time,end,`[ARISE_GATE:${p.id}:${g.id}]`,15);g.calendarEventId=made.id;save();renderCalendar();if(made._local)toastCalendarUndo("Gate scheduled",async()=>{state.calendar.localEvents=state.calendar.localEvents.filter(e=>e.id!==made.id);g.calendarEventId=null});else toast("Gate scheduled","xp")}catch(err){toast("Schedule failed: "+((err&&err.message)||String(err)),"danger")}
@@ -2479,6 +2508,21 @@ document.addEventListener("click", async (e)=>{
       await tauriInvoke("google_connect",{clientId,clientSecret});localStorage.setItem(GOOGLE_CALENDAR_OWNER_KEY,activeDataUserId);document.getElementById("googleClientSecret").value="";googleStatusMsg("Google Calendar connected.","ok");await syncGoogleCalendar(true)
     }catch(e){googleStatusMsg("Connection failed: "+((e&&e.message)||String(e)),"err")}t.disabled=false;return;
   }
+  if(t.id==="googleConnectWeb"){
+    const g=googleWebClient();if(!g)return;
+    const pending=g.connect(); // first thing in the tap, so the browser allows Google's popup
+    t.disabled=true;googleStatusMsg("Waiting for Google…","");
+    try{await pending;googleStatusMsg("Connected","ok");renderGoogleWebCard();await syncGoogleCalendar(true);toast("Google Calendar connected","xp")}
+    catch(err){googleStatusMsg((err&&err.message)||String(err),"err")}
+    t.disabled=false;return;
+  }
+  if(t.id==="googleSyncWeb"){await syncGoogleCalendar(false);return}
+  if(t.id==="googleDisconnectWeb"){
+    const g=googleWebClient();if(!g)return;
+    const ok=await uiConfirm("ARISE will stop showing your Google events. Nothing in your Google Calendar is changed.",{title:"Disconnect Google Calendar?",okLabel:"Disconnect"});
+    if(!ok)return;
+    g.disconnect();state.calendar.events=[];save();renderCalendar();googleStatusMsg("Not connected","");renderGoogleWebCard();return;
+  }
   if(t.id==="googleDisconnect"){
     if(localStorage.getItem(GOOGLE_CALENDAR_OWNER_KEY)!==activeDataUserId){googleStatusMsg("No Google Calendar is connected to this ARISE account.");return}
     await tauriInvoke("google_disconnect");localStorage.removeItem(GOOGLE_CALENDAR_OWNER_KEY);state.calendar.events=[];save();renderCalendar();googleStatusMsg("Disconnected.");return
@@ -2581,7 +2625,7 @@ document.addEventListener("click", async (e)=>{
     const title=document.getElementById("calEventTitle").value.trim(),date=document.getElementById("calEventDate").value,start=document.getElementById("calEventStart").value,end=document.getElementById("calEventEnd").value,rem=document.getElementById("calEventReminder").value,gateRef=document.getElementById("calEventGate").value,eventId=document.getElementById("calEventId").value,repeat=document.getElementById("calEventRepeat").value;
     const addMeet=document.getElementById("calEventMeet").checked,guests=parseGuestEmails(document.getElementById("calEventGuests").value),invalid=guests.filter(email=>!validGuestEmail(email)),guestError=document.getElementById("calGuestError");
     if(eventId&&(addMeet||guests.length)&&document.getElementById("calEventSource").value!=="google"){toast("Google Meet and guest invitations need a Google Calendar event.","danger");return}
-    guestError.textContent=invalid.length?`Check ${invalid.join(", ")}`:"";if(!title||!date||!start||!end||invalid.length)return;t.disabled=true;try{if(eventId){const old=allCalendarEvents().find(e=>e.id===eventId),before=JSON.parse(JSON.stringify(editableEventPayload(old))),routineItem=old._routine&&findRoutine(old._routineKey),routineBefore=routineItem&&JSON.parse(JSON.stringify(routineItem)),s=new Date(`${date}T${start}:00`),en=new Date(`${date}T${end}:00`);if(en<=s)throw new Error("End time must be after start time.");const payload={...editableEventPayload(old),summary:title,description:(old&&old.description)||"",start:{...old.start,dateTime:s.toISOString()},end:{...old.end,dateTime:en.toISOString()},reminders:{useDefault:false,overrides:[{method:"popup",minutes:+rem}]},attendees:guests.map(email=>({email}))};if(addMeet&&!googleMeetLink(old))payload.conferenceData={createRequest:{requestId:uid("meet"),conferenceSolutionKey:{type:"hangoutsMeet"}}};let undoLocal;if(old._routine)updateRoutine(routineItem,title,date,start,end);else if(old._local)undoLocal=updateLocalOccurrence(old,payload);else{const updated=await tauriInvoke("google_update_event",{eventId,event:payload});Object.assign(old,updated)}rememberGuestEmails(guests);save();closeCalendarDrawer();renderCalendar();toastCalendarUndo("Schedule updated",async()=>{if(old._routine)Object.assign(routineItem,routineBefore);else if(old._local)undoLocal();else Object.assign(old,await tauriInvoke("google_update_event",{eventId,event:before}))})}else{pushUndo("adding that calendar item");const description=gateRef?`[ARISE_GATE:${gateRef}]`:"Created by ARISE",localTomorrow=document.getElementById("calEventSource").value==="tomorrow",made=localTomorrow?createLocalCalendarEvent(title,date,start,end,description,rem,repeat):await createCalendarEvent(title,date,start,end,description,rem,repeat,{addMeet,guests});rememberGuestEmails(guests);if(gateRef){const [pid,gid]=gateRef.split(":"),p=findProject(pid),g=p&&findGate(p,gid);if(g){g.calendarEventId=made.id;g.plannedStart=start}}save();closeCalendarDrawer();renderCalendar();if(made._local)toastCalendarUndo("Added to your plan",async()=>{state.calendar.localEvents=state.calendar.localEvents.filter(e=>e.id!==made.id);if(gateRef){const [pid,gid]=gateRef.split(":"),p=findProject(pid),g=p&&findGate(p,gid);if(g)g.calendarEventId=null}});else toast(addMeet?"Meet created and shown in ARISE":"Added to Google Calendar","xp")}}catch(err){toast(((err&&err.message)||String(err)),"danger")}t.disabled=false;return;
+    guestError.textContent=invalid.length?`Check ${invalid.join(", ")}`:"";if(!title||!date||!start||!end||invalid.length)return;t.disabled=true;try{if(eventId){const old=allCalendarEvents().find(e=>e.id===eventId),before=JSON.parse(JSON.stringify(editableEventPayload(old))),routineItem=old._routine&&findRoutine(old._routineKey),routineBefore=routineItem&&JSON.parse(JSON.stringify(routineItem)),s=new Date(`${date}T${start}:00`),en=new Date(`${date}T${end}:00`);if(en<=s)throw new Error("End time must be after start time.");const payload={...editableEventPayload(old),summary:title,description:(old&&old.description)||"",start:{...old.start,dateTime:s.toISOString()},end:{...old.end,dateTime:en.toISOString()},reminders:{useDefault:false,overrides:[{method:"popup",minutes:+rem}]},attendees:guests.map(email=>({email}))};if(addMeet&&!googleMeetLink(old))payload.conferenceData={createRequest:{requestId:uid("meet"),conferenceSolutionKey:{type:"hangoutsMeet"}}};let undoLocal;if(old._routine)updateRoutine(routineItem,title,date,start,end);else if(old._local)undoLocal=updateLocalOccurrence(old,payload);else{const updated=await googleCall("google_update_event",{eventId,event:payload});Object.assign(old,updated)}rememberGuestEmails(guests);save();closeCalendarDrawer();renderCalendar();toastCalendarUndo("Schedule updated",async()=>{if(old._routine)Object.assign(routineItem,routineBefore);else if(old._local)undoLocal();else Object.assign(old,await googleCall("google_update_event",{eventId,event:before}))})}else{pushUndo("adding that calendar item");const description=gateRef?`[ARISE_GATE:${gateRef}]`:"Created by ARISE",localTomorrow=document.getElementById("calEventSource").value==="tomorrow",made=localTomorrow?createLocalCalendarEvent(title,date,start,end,description,rem,repeat):await createCalendarEvent(title,date,start,end,description,rem,repeat,{addMeet,guests});rememberGuestEmails(guests);if(gateRef){const [pid,gid]=gateRef.split(":"),p=findProject(pid),g=p&&findGate(p,gid);if(g){g.calendarEventId=made.id;g.plannedStart=start}}save();closeCalendarDrawer();renderCalendar();if(made._local)toastCalendarUndo("Added to your plan",async()=>{state.calendar.localEvents=state.calendar.localEvents.filter(e=>e.id!==made.id);if(gateRef){const [pid,gid]=gateRef.split(":"),p=findProject(pid),g=p&&findGate(p,gid);if(g)g.calendarEventId=null}});else toast(addMeet?"Meet created and shown in ARISE":"Added to Google Calendar","xp")}}catch(err){toast(((err&&err.message)||String(err)),"danger")}t.disabled=false;return;
   }
   if(t.id==="calDeleteSeries"){
     const occurrence=allCalendarEvents().find(e=>e.id===document.getElementById("calEventId").value);

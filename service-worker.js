@@ -1,5 +1,5 @@
 /* ARISE's offline app shell. Never cache Supabase, OAuth, or user data. */
-const CACHE_NAME='arise-shell-2026-09-28-v2';
+const CACHE_NAME='arise-shell-2026-09-28-v3';
 const CACHE_PREFIX='arise-shell-';
 const SHELL=[
   './','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png',
@@ -9,7 +9,7 @@ const SHELL=[
   './achievements.js','./bucket-list.js','./weekly-planner-engine.js','./weekly-planner.js',
   './today.js','./tomorrow.js','./quick-actions.js','./system-motion.js','./health.js',
   './notifications.js','./custom-reminders.js','./widget-snapshot.js','./hand-gestures.js',
-  './hand-control.js','./cloud-config.js','./cloud-sync.js','./cloud-data.js','./app.js','./pwa.js'
+  './hand-control.js','./cloud-config.js','./cloud-sync.js','./google-web.js','./cloud-data.js','./app.js','./pwa.js'
 ];
 const shellURLs=new Set(SHELL.map(path=>new URL(path,self.registration.scope).href));
 

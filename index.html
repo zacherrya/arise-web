@@ -1221,6 +1221,14 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
               <div class="st-card-head"><div class="st-card-name">Google Calendar</div><div id="googleStatus" class="ai-status">Checking connection…</div></div>
             </div>
             <p class="st-desc">See your Google events in ARISE's calendar, and send planned tasks back to Google.</p>
+            <div id="googleWebConnect" style="display:none;">
+              <div class="st-actions">
+                <button class="btn btn-primary btn-sm" id="googleConnectWeb">Connect Google Calendar</button>
+                <button class="btn btn-primary btn-sm" id="googleSyncWeb" style="display:none;">Sync now</button>
+                <button class="st-link st-link-danger" type="button" id="googleDisconnectWeb" style="display:none;">Disconnect</button>
+              </div>
+              <p class="st-fine" id="googleWebHint">You'll approve access on Google, then come straight back here. ARISE only asks to see and manage calendar events.</p>
+            </div>
             <div class="st-desktop-only">
               <p class="st-fine">For now this uses your own Google Cloud desktop credentials. Tokens are stored in macOS Keychain.</p>
               <div class="field"><label for="googleClientId">OAuth client ID</label><input id="googleClientId" placeholder="…apps.googleusercontent.com" autocomplete="off" spellcheck="false"></div>
@@ -1380,6 +1388,7 @@ body.cal-dragging .cal-backlog{pointer-events:none!important;}
 <script src="hand-control.js"></script>
 <script src="cloud-config.js"></script>
 <script src="cloud-sync.js"></script>
+<script src="google-web.js"></script>
 <script src="cloud-data.js"></script>
 <script src="app.js"></script>
 <script src="pwa.js"></script>
